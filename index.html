@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SIM-KENNEDY • Simulador Territorial de Soberanía Alimentaria</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="app-layout">
+    <!-- Topbar / HUD Táctico Superior -->
+    <header id="hud-header">
+      <div class="brand-section">
+        <svg class="brand-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polygon points="12 2 2 7 12 12 22 7 12 2"/>
+          <polyline points="2 17 12 22 22 17"/>
+          <polyline points="2 12 12 17 22 12"/>
+        </svg>
+        <div>
+          <div class="brand-title">SIM-KENNEDY • SOBERANÍA ALIMENTARIA</div>
+          <div class="brand-subtitle">Modelo Territorial Basado en Agentes y Redes Socioecológicas</div>
+        </div>
+      </div>
+
+      <div class="hud-telemetry">
+        <div class="telemetry-item">TIEMPO: <b id="hud-time">Semana 0 / 104</b></div>
+        <div class="telemetry-item">SEMILLA: <b id="hud-seed">42</b></div>
+        <div class="badge-status" id="hud-balance-badge">✓ BALANCE DE MASA OK</div>
+      </div>
+    </header>
+
+    <!-- Toolbar de Controles y Escenarios -->
+    <nav id="control-toolbar">
+      <div class="control-group">
+        <button class="btn btn-primary" id="btn-play">▶ Iniciar</button>
+        <button class="btn" id="btn-step">Paso (+1 Sem)</button>
+        <button class="btn" id="btn-reset">↺ Reiniciar</button>
+        <button class="btn btn-montecarlo" id="btn-montecarlo">⚄ Monte Carlo (30 Semillas)</button>
+      </div>
+
+      <div class="control-group">
+        <label style="font-size:11px;color:#94a3b8">Escenario:</label>
+        <select id="select-scenario" class="select-field">
+          <option value="s1_mas_bavaria" selected>Propuesta Integral (+ Bavaria E19 & Distrito E12)</option>
+          <option value="s1_huertas_intercambio">Escenario 2: Huertas + Intercambio Barrial (E06, E08)</option>
+          <option value="s1_solo_huertas">Escenario 1: Solo Huertas (Autoproducción)</option>
+          <option value="s1_sin_intervencion">Línea Base: Sin Intervención (Dependencia >94%)</option>
+        </select>
+
+        <label style="font-size:11px;color:#94a3b8;margin-left:8px">Estrés Transversal:</label>
+        <select id="select-stress" class="select-field">
+          <option value="ninguno" selected>Sin estrés exógeno</option>
+          <option value="estres_choque_corabastos">Choque de Precios Corabastos (+55%)</option>
+          <option value="estres_sequia">Sequía Prolongada (El Niño -65% lluvia)</option>
+          <option value="estres_crecimiento_poblacional">Crecimiento Demográfico (+30%)</option>
+        </select>
+      </div>
+
+      <div class="control-group">
+        <button class="btn" id="btn-export-csv">📥 Exportar CSV</button>
+      </div>
+    </nav>
+
+    <!-- Área Principal de Simulación -->
+    <main id="main-viewport">
+      <!-- Contenedor de Vistas Territoriales -->
+      <div id="view-container">
+        <!-- Capa 1: Mapa Territorial 2D Interactivo -->
+        <div id="layer-map-2d" class="view-layer active">
+          <canvas id="map-canvas" class="display-canvas"></canvas>
+        </div>
+
+        <!-- Capa 2: Maqueta 3D Territorial -->
+        <div id="layer-view-3d" class="view-layer">
+          <div id="view-3d-container" style="width:100%;height:100%"></div>
+        </div>
+
+        <!-- Barra flotante de navegación entre vistas -->
+        <div id="bottom-navbar">
+          <div class="nav-pill active" data-view="2d">Mapa 2D (Kennedy)</div>
+          <div class="nav-pill" data-view="3d">Maqueta 3D</div>
+        </div>
+      </div>
+
+      <!-- Panel Lateral de Métricas y Analítica -->
+      <aside id="sidebar-panel">
+        <div class="sidebar-tabs">
+          <div class="sidebar-tab active" data-tab="tab-kpis">Métricas</div>
+          <div class="sidebar-tab" data-tab="tab-charts">Analítica</div>
+          <div class="sidebar-tab" data-tab="tab-params">Parámetros</div>
+          <div class="sidebar-tab" data-tab="tab-tests">Verificación</div>
+        </div>
+
+        <!-- Pestaña 1: KPIs y Monitoreo -->
+        <div id="tab-kpis" class="tab-pane active">
+          <div class="kpi-grid">
+            <div class="kpi-card">
+              <div class="kpi-title">Autonomía Local</div>
+              <div class="kpi-value green" id="kpi-autonomia">0.0%</div>
+              <div class="kpi-sub" id="kpi-produccion">Cosecha: 0 kg/sem</div>
+            </div>
+
+            <div class="kpi-card">
+              <div class="kpi-title">Dependencia Corabastos</div>
+              <div class="kpi-value warn" id="kpi-dependencia">94.0%</div>
+              <div class="kpi-sub" id="kpi-compras-may">Mayorista: 0 kg/sem</div>
+            </div>
+
+            <div class="kpi-card">
+              <div class="kpi-title">Huertas Activas</div>
+              <div class="kpi-value" id="kpi-huertas">0</div>
+              <div class="kpi-sub" id="kpi-promotores">Promotores: 0</div>
+            </div>
+
+            <div class="kpi-card">
+              <div class="kpi-title">Bio-residuos Desviados</div>
+              <div class="kpi-value green" id="kpi-organicos">0.0 Ton</div>
+              <div class="kpi-sub" id="kpi-compost">Compost: 0 kg/sem</div>
+            </div>
+
+            <div class="kpi-card">
+              <div class="kpi-title">Población Tingua</div>
+              <div class="kpi-value" id="kpi-aves">45</div>
+              <div class="kpi-sub" id="kpi-conectividad">Conectividad: 0.55</div>
+            </div>
+
+            <div class="kpi-card">
+              <div class="kpi-title">Tiempo Decisión</div>
+              <div class="kpi-value" id="kpi-tiempo-gob">2.0 sem</div>
+              <div class="kpi-sub" id="kpi-poder">HHI Poder: 0.20</div>
+            </div>
+          </div>
+
+          <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border-line);border-radius:8px;padding:12px">
+            <div style="font-weight:bold;color:var(--accent-glow);margin-bottom:6px">ESTRATEGIA BAVARIA COMÚN (E19/E20)</div>
+            <p style="font-size:11.5px;color:var(--text-muted);line-height:1.45">
+              Bavaria Común opera como nodo de conocimiento y extensión agroecológica. No concentra alimentos; transfiere semillas del banco E15, bioinsumos y capacitación a huertas en vivienda (E01), altura (E02), baldíos (E03) y amortiguación de humedales (E04).
+            </p>
+          </div>
+        </div>
+
+        <!-- Pestaña 2: Analítica y Gráficos -->
+        <div id="tab-charts" class="tab-pane">
+          <div style="margin-bottom:10px">
+            <label style="font-size:11px;color:#94a3b8">Variable a graficar:</label>
+            <select id="select-chart-metric" class="select-field" style="width:100%;margin-top:4px">
+              <option value="participacion_local_pct" selected>Participación Volumen Local (%)</option>
+              <option value="dependencia_corabastos_pct">Dependencia de Corabastos (%)</option>
+              <option value="produccion_kg">Cosecha Total Huertas (kg/semana)</option>
+              <option value="desabastecimiento_kg">Alimentos Desatendidos (kg/semana)</option>
+              <option value="huertas_activas">Huertas Activas</option>
+              <option value="stock_conocimiento">Índice Conocimiento Compartido</option>
+              <option value="toneladas_desviadas_acum">Bio-residuos Desviados Acumulados (Ton)</option>
+              <option value="compost_retornado_kg">Compost Retornado a Huertas (kg/sem)</option>
+              <option value="indice_conectividad">Conectividad del Paisaje (0-1)</option>
+              <option value="poblacion_tingua">Población Tingua Bogotana</option>
+              <option value="tiempo_decision_sem">Tiempo de Decisión (Gobernanza)</option>
+              <option value="precio_suelo_m2">Precio del Suelo (COP/m²)</option>
+              <option value="permanencia_residentes_pct">Permanencia Residentes (%)</option>
+            </select>
+          </div>
+
+          <div style="height:260px;background:rgba(6,11,18,0.9);border:1px solid var(--border-line);border-radius:8px;padding:6px">
+            <canvas id="chart-canvas" style="width:100%;height:100%"></canvas>
+          </div>
+
+          <div style="margin-top:10px;font-size:11px;color:var(--text-muted);line-height:1.4">
+            <b>Nota metodológica:</b> En modo Monte Carlo, la línea central representa la <b>mediana</b> de las 30 semillas, y la banda sombreada representa el <b>rango intercuartílico (IQR: percentiles 25 a 75)</b>.
+          </div>
+        </div>
+
+        <!-- Pestaña 3: Panel de Parámetros -->
+        <div id="tab-params" class="tab-pane">
+          <div id="params-panel-content"></div>
+        </div>
+
+        <!-- Pestaña 4: Verificación y Auditoría -->
+        <div id="tab-tests" class="tab-pane">
+          <div style="margin-bottom:12px">
+            <div style="font-weight:bold;color:var(--accent-glow);margin-bottom:6px">PRUEBAS Y AUDITORÍA FORMAL</div>
+            <p style="font-size:11.5px;color:var(--text-muted);line-height:1.4">
+              Comprueba el cumplimiento de las reglas duras del modelo: determinismo por semilla y conservación estricta de balance de masa.
+            </p>
+          </div>
+
+          <button class="btn btn-primary" id="btn-run-tests" style="width:100%;justify-content:center;margin-bottom:12px">
+            ⚙ Ejecutar Suite de Pruebas
+          </button>
+
+          <div id="test-results-log" style="background:#04080e;border:1px solid var(--border-line);border-radius:6px;padding:10px;font-family:monospace;font-size:11px;min-height:160px;max-height:260px;overflow-y:auto;color:#cbd5e1">
+            Esperando ejecución de pruebas...
+          </div>
+        </div>
+      </aside>
+    </main>
+
+    <!-- Notificación Flotante (Toast) -->
+    <div id="toast-notification">Notificación</div>
+  </div>
+
+  <!-- Entrada Modular ES6 -->
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
