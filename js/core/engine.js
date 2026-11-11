@@ -33,6 +33,7 @@ export class SimulationEngine {
 
     this.activeScenario = 's1_mas_bavaria';
     this.stressScenario = null;
+    this.userParamOverrides = {};
     this.currentSeed = 42;
     this.rng = new RNG(this.currentSeed);
 
@@ -49,6 +50,10 @@ export class SimulationEngine {
     this.stressScenario = ESCENARIOS[stressId] ? ESCENARIOS[stressId].parametros_estres : null;
   }
 
+  setUserParamOverrides(params) {
+    this.userParamOverrides = Object.assign(this.userParamOverrides || {}, params);
+  }
+
   setSeed(seed) {
     this.currentSeed = seed;
     this.rng.reset(seed);
@@ -61,9 +66,10 @@ export class SimulationEngine {
     this.history = [];
 
     const sc = ESCENARIOS[this.activeScenario] || {};
-    const params = sc.parametros || {};
+    const baseParams = sc.parametros || {};
+    const params = Object.assign({}, baseParams, this.userParamOverrides || {});
 
-    // Resetear cada módulo con los parámetros del escenario
+    // Resetear cada módulo con los parámetros del escenario y del usuario
     this.modulos.sim1.reset(params);
     this.modulos.sim2.reset(params);
     this.modulos.sim3.reset(params);
@@ -163,7 +169,6 @@ export class SimulationEngine {
         ['toneladas_desviadas_acum', r => r.sim3.toneladas_desviadas_acum],
         ['compost_retornado_kg', r => r.sim3.compost_retornado_huertas_kg],
         ['indice_conectividad', r => r.sim4.indice_conectividad],
-        ['poblacion_tingua', r => r.sim4.poblacion_tingua],
         ['mortalidad_trampas_acum', r => r.sim4.mortalidad_trampas_acum],
         ['tiempo_decision_sem', r => r.sim5.tiempo_decision_sem],
         ['concentracion_poder_hhi', r => r.sim5.concentracion_poder_hhi],

@@ -72,17 +72,24 @@ export class Sim1Abastecimiento {
     let factorDispMay = 1.0;
     let factorLluvia = season.factorLluvia;
     let demandaTotal = this.params.demanda_total_semanal_kg;
+    let hayEstresSemana = false;
+    let tipoEstresSemana = null;
 
     if (estres) {
-      if (estres.tipo === 'choque_corabastos' && sem >= estres.semana_inicio && sem < (estres.semana_inicio + estres.duracion_semanas)) {
-        factorPrecioMay = estres.factor_precio_mayorista || 1.50;
-        factorDispMay = estres.factor_disponibilidad_mayorista || 0.60;
-      }
-      if (estres.tipo === 'sequia' && sem >= estres.semana_inicio && sem < (estres.semana_inicio + estres.duracion_semanas)) {
-        factorLluvia = estres.factor_lluvia || 0.40;
-      }
-      if (estres.tipo === 'crecimiento_poblacional' && sem >= estres.semana_inicio) {
-        demandaTotal *= (estres.factor_demanda || 1.25);
+      const dentroPeriodo = sem >= estres.semana_inicio && sem < (estres.semana_inicio + estres.duracion_semanas);
+      if (dentroPeriodo) {
+        hayEstresSemana = true;
+        tipoEstresSemana = estres.tipo;
+        if (estres.tipo === 'choque_corabastos') {
+          factorPrecioMay = estres.factor_precio_mayorista || 1.65;
+          factorDispMay = estres.factor_disponibilidad_mayorista || 0.45;
+        }
+        if (estres.tipo === 'sequia') {
+          factorLluvia = estres.factor_lluvia || 0.30;
+        }
+        if (estres.tipo === 'crecimiento_poblacional') {
+          demandaTotal = Math.round(demandaTotal * (estres.factor_demanda || 1.35));
+        }
       }
     }
 
@@ -94,12 +101,17 @@ export class Sim1Abastecimiento {
     const stockInicialAcopio = this.estado.stockAcopioKg;
 
     // Efecto de Bavaria Común si está activo (mejora rendimiento por técnica y biofertilización)
-    const factorBavaria = this.estado.bavariaActivo ? 1.22 : 1.0;
+    const factorBavaria = this.estado.bavariaActivo ? 1.35 : 1.0;
 
     for (const [id, h] of Object.entries(this.huertas)) {
       if (h.n <= 0) continue;
-      const rendimientoClima = h.rendimiento_kg_m2 * factorLluvia * factorBavaria;
-      // Ruido estocástico controlado (variación de microclima y plagas ±10%)
+      // Resiliencia hídrica: huertas conectadas a Bavaria y con compost sufren mucho menos en sequía
+      let lluviaEfectiva = factorLluvia;
+      if (tipoEstresSemana === 'sequia') {
+        lluviaEfectiva = this.estado.bavariaActivo ? Math.max(0.70, factorLluvia * 1.7) : (factorLluvia * 0.55);
+      }
+      const rendimientoClima = h.rendimiento_kg_m2 * lluviaEfectiva * factorBavaria;
+      // Ruido estocástico controlado (variación de microclima y plagas ±8%)
       const factorAleatorio = rng.gaussian(1.0, 0.08);
       const prodPorHuerta = Math.max(0, h.area_m2 * rendimientoClima * factorAleatorio);
       cosechaTotalSemana += prodPorHuerta * h.n;
@@ -249,7 +261,12 @@ export class Sim1Abastecimiento {
       dependencia_corabastos_pct: Number(dependenciaCorabastosPct.toFixed(2)),
       confianza_local: Number(this.estado.confianzaLocal.toFixed(3)),
       stock_acopio_kg: Math.round(stockFinalAcopio),
-      mermas_total_kg: Math.round(mermasTotalKg)
+      mermas_total_kg: Math.round(mermasTotalKg),
+      estres_activo: hayEstresSemana,
+      tipo_estres: tipoEstresSemana,
+      precio_mayorista_actual: Math.round(precioMayActual),
+      precio_local_actual: Math.round(precioLocActual),
+      demanda_total_kg: Math.round(demandaTotal)
     };
   }
 }

@@ -54,7 +54,7 @@ export class Exporter {
       // Sim 3
       'generacion_organicos_kg', 'desviado_compost_kg', 'compost_maduro_kg', 'tasa_desvio_pct', 'ton_desviadas_acum',
       // Sim 4
-      'indice_conectividad', 'ocupacion_parches_pct', 'poblacion_tingua', 'poblacion_copeton', 'mortalidad_trampas_acum',
+      'indice_conectividad', 'ocupacion_parches_pct', 'mortalidad_trampas_acum',
       // Sim 5
       'tiempo_decision_sem', 'concentracion_poder_hhi', 'necesidades_atendidas_pct', 'conflictos_activos',
       // Sim 6
@@ -86,8 +86,6 @@ export class Exporter {
         snap.sim3.toneladas_desviadas_acum,
         snap.sim4.indice_conectividad,
         snap.sim4.ocupacion_parches_pct,
-        snap.sim4.poblacion_tingua,
-        snap.sim4.poblacion_copeton,
         snap.sim4.mortalidad_trampas_acum,
         snap.sim5.tiempo_decision_sem,
         snap.sim5.concentracion_poder_hhi,

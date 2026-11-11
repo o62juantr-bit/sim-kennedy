@@ -11,7 +11,6 @@ export class Sim4Habitat {
     this.nombre = 'Hábitat y Avifauna Nativa';
     this.config = Object.assign({
       especies: {
-        tingua_bogotana: { nombre: 'Tingua bogotana (Rallus semiplumbeus)', gremio: 'humedal_orilla', radio_disp_m: 600, poblacion_base: 45, sensibilidad_luz_ruido: 0.85, fuente: 'POR VERIFICAR' },
         colibri_chillon: { nombre: 'Colibrí chillón (Colibri coruscans)', gremio: 'nectarivoro', radio_disp_m: 2200, poblacion_base: 120, sensibilidad_luz_ruido: 0.25, fuente: 'POR VERIFICAR' },
         copeton: { nombre: 'Copetón (Zonotrichia capensis)', gremio: 'percha_semillero', radio_disp_m: 1500, poblacion_base: 310, sensibilidad_luz_ruido: 0.30, fuente: 'POR VERIFICAR' },
         garza_blanca: { nombre: 'Garza blanca (Ardea alba)', gremio: 'humedal_acuatico', radio_disp_m: 2800, poblacion_base: 25, sensibilidad_luz_ruido: 0.70, fuente: 'POR VERIFICAR' },
@@ -101,7 +100,7 @@ export class Sim4Habitat {
         this.estado.tasaParasitismoCriaPct = tasaParasitismo * 100;
       }
 
-      // Sensibilidad al disturbio en especies especialistas del humedal (Tingua, Garza)
+      // Sensibilidad al disturbio en especies dependientes del humedal (Garza, etc.)
       if (esp.sensibilidad_luz_ruido > 0.6) {
         // Si hay sobreocupación sin barrera en E04, sufren estrés
         if (p.huertas_en_borde_e04 && !p.medidas_antitrampa) {
@@ -126,7 +125,6 @@ export class Sim4Habitat {
       semana: sem,
       indice_conectividad: Number(indiceConectividad.toFixed(3)),
       ocupacion_parches_pct: Number(this.estado.tasaOcupacionParchesPct.toFixed(1)),
-      poblacion_tingua: this.estado.poblaciones['tingua_bogotana'],
       poblacion_colibri: this.estado.poblaciones['colibri_chillon'],
       poblacion_copeton: this.estado.poblaciones['copeton'],
       poblacion_garza: this.estado.poblaciones['garza_blanca'],

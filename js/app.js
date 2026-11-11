@@ -28,9 +28,18 @@ class AppController {
     this.view3D = new View3D('view-3d-container');
     this.chartRenderer = new ChartRenderer('chart-canvas');
     this.paramsPanel = new ParamsPanel('params-panel-content', (newParams) => {
-      this.engine.reset();
-      this.toast('Parámetros actualizados para análisis de sensibilidad');
-      this.updateKPIs(null);
+      this.engine.setUserParamOverrides(newParams);
+      const hadHistory = this.engine.history.length > 0;
+      const wasAtEnd = this.engine.clock.isFinished();
+      this.resetSimulation();
+      if (hadHistory && wasAtEnd) {
+        this.engine.runFull();
+        const lastSnap = this.engine.history[this.engine.history.length - 1];
+        this.updateKPIs(lastSnap);
+        this.updateHUD(lastSnap);
+        this.updateCharts();
+      }
+      this.toast('Parámetros aplicados al análisis de sensibilidad');
     });
 
     // Render loop para el mapa 2D continuo
@@ -75,6 +84,17 @@ class AppController {
       const val = e.target.value;
       if (val === 'ninguno') this.engine.setStressScenario(null);
       else this.engine.setStressScenario(val);
+      
+      const hadHistory = this.engine.history.length > 0;
+      const wasAtEnd = this.engine.clock.isFinished();
+      this.resetSimulation();
+      if (hadHistory && wasAtEnd) {
+        this.engine.runFull();
+        const lastSnap = this.engine.history[this.engine.history.length - 1];
+        this.updateKPIs(lastSnap);
+        this.updateHUD(lastSnap);
+        this.updateCharts();
+      }
       this.toast(val === 'ninguno' ? 'Estrés exógeno desactivado' : `Estrés activo: ${selStress.selectedOptions[0].text}`);
     });
 
@@ -242,8 +262,8 @@ class AppController {
       document.getElementById('kpi-promotores').textContent = 'Promotores: 0';
       document.getElementById('kpi-organicos').textContent = '0.0 Ton';
       document.getElementById('kpi-compost').textContent = 'Compost: 0 kg/sem';
-      document.getElementById('kpi-aves').textContent = '45';
-      document.getElementById('kpi-conectividad').textContent = 'Conectividad: 0.55';
+      document.getElementById('kpi-conectividad-val').textContent = '0.55';
+      document.getElementById('kpi-corredor-sub').textContent = 'Corredores Activos: 85%';
       document.getElementById('kpi-tiempo-gob').textContent = '2.0 sem';
       document.getElementById('kpi-poder').textContent = 'HHI Poder: 0.20';
       return;
@@ -260,8 +280,8 @@ class AppController {
     document.getElementById('kpi-organicos').textContent = `${snap.sim3.toneladas_desviadas_acum} Ton`;
     document.getElementById('kpi-compost').textContent = `Compost: ${snap.sim3.compost_maduro_kg.toLocaleString()} kg/sem`;
 
-    document.getElementById('kpi-aves').textContent = snap.sim4.poblacion_tingua;
-    document.getElementById('kpi-conectividad').textContent = `Conectividad: ${snap.sim4.indice_conectividad}`;
+    document.getElementById('kpi-conectividad-val').textContent = `${snap.sim4.indice_conectividad}`;
+    document.getElementById('kpi-corredor-sub').textContent = `Ocupación: ${snap.sim4.ocupacion_parches_pct}%`;
 
     document.getElementById('kpi-tiempo-gob').textContent = `${snap.sim5.tiempo_decision_sem} sem`;
     document.getElementById('kpi-poder').textContent = `HHI Poder: ${snap.sim5.concentracion_poder_hhi}`;

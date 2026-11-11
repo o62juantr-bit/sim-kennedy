@@ -5,11 +5,10 @@
 
 ---
 
-## 2. Gremios de Avifauna Modelados
+## 2. Gremios Ecológicos Modelados
 
 | Especie / Gremio | Requerimientos de Hábitat | Sensibilidad / Amenazas Urbanas |
 |---|---|---|
-| **Tingua Bogotana (*Rallus semiplumbeus*)** | Juncales densos, cuerpos de agua someros, vegetación riparia en E04 y humedales. Especie endémica vulnerable. | Alta sensibilidad a pérdida de ronda, perros ferales y fragmentación severa. |
 | **Colibrí Cometa (*Lesbia nuna*)** | Estrato arbustivo y floral rico en néctar (abutilón, salvia, fucsia) en huertas y balcones (E02, E05). | Colisiones contra ventanales no tratados en edificios de altura. |
 | **Copetón (*Zonotrichia capensis*)** | Insectívoro y granívoro generalista; anida en arbustos bajos en huertas familiares. | Parasitismo de nidadas por el Chamón (*Molothrus bonariensis*). |
 | **Garza Bueyera (*Bubulcus ibis*)** | Zonas de pastizal abierto húmedo y rondas de canales (E04, E16). | Contaminación acuática y basureros a cielo abierto. |
@@ -44,7 +43,6 @@ Donde:
 
 | Parámetro | Valor por Defecto | Rango de Sensibilidad | Fuente / Justificación |
 |---|---|---|---|
-| Distancia media de vuelo Tingua ($d_0$) | 450 metros | 200 - 800 m | `"fuente": "POR VERIFICAR"` (Dispersión limitada entre humedales) |
 | Distancia media de vuelo Colibrí ($d_0$) | 1,200 metros | 600 - 2,500 m | `"fuente": "POR VERIFICAR"` |
 | Tasa de colisión ventanales E02 sin UV | 0.015 /ave/semana | 0.005 - 0.040 | `"fuente": "POR VERIFICAR"` (Mortalidad por trampa ecológica) |
 | Tasa de parasitismo de nidadas Chamón | 12.0 % de nidadas | 4.0 % - 30.0 % | `"fuente": "POR VERIFICAR"` (Impacto en bordes urbanos degradados) |

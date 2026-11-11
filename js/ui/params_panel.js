@@ -105,11 +105,11 @@ export class ParamsPanel {
       </div>
 
       <div class="params-section">
-        <h3>SIMULACIÓN 4: HÁBITAT Y FAUNA</h3>
+        <h3>SIMULACIÓN 4: CONECTIVIDAD AGROECOLÓGICA Y CORREDORES</h3>
 
         <div class="param-row">
           <div class="param-label">
-            <span>Medidas Antitrampa (Vidrios UV / Luz)</span>
+            <span>Franjas de Amortiguación Agroecológica (E04)</span>
             <span class="source-tag verified">Diseño Biourbano</span>
           </div>
           <div class="param-input-group">

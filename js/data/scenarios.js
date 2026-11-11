@@ -98,12 +98,13 @@ export const ESCENARIOS = {
     id: 'estres_choque_corabastos',
     modulo: 'transversal',
     nombre: 'Estrés Transversal: Choque de Precios / Bloqueo en Corabastos',
-    descripcion: 'Simula un bloqueo vial o paro agrario en la central: el precio mayorista sube +55% y el volumen disponible cae 40%.',
+    descripcion: 'Simula paro agrario o crisis en la central: precio mayorista sube +65% y el volumen de Corabastos cae -55%, disparando el desabastecimiento.',
     parametros_estres: {
-      semana_inicio: 30,
-      duracion_semanas: 12,
-      factor_precio_mayorista: 1.55,
-      factor_disponibilidad_mayorista: 0.60
+      tipo: 'choque_corabastos',
+      semana_inicio: 15,
+      duracion_semanas: 35,
+      factor_precio_mayorista: 1.65,
+      factor_disponibilidad_mayorista: 0.45
     }
   },
 
@@ -111,23 +112,26 @@ export const ESCENARIOS = {
     id: 'estres_sequia',
     modulo: 'transversal',
     nombre: 'Estrés Transversal: Sequía Prolongada (Fenómeno de El Niño)',
-    descripcion: 'Déficit hídrico del 65% en lluvia durante 20 semanas consecutivas. Pone a prueba la captación de agua lluvia y el compost.',
+    descripcion: 'Déficit hídrico del 70% en lluvia durante 35 semanas. Pone a prueba la retención de humedad por compostaje y bioinsumos de Bavaria.',
     parametros_estres: {
-      semana_inicio: 40,
-      duracion_semanas: 20,
-      factor_lluvia: 0.35,
-      impacto_sin_compost: 0.50 // Pérdida de rendimiento en huertas sin suelo mejorado
+      tipo: 'sequia',
+      semana_inicio: 15,
+      duracion_semanas: 35,
+      factor_lluvia: 0.30,
+      impacto_sin_compost: 0.40 // Huertas sin compost pierden 60% de cosecha
     }
   },
 
   estres_crecimiento_poblacional: {
     id: 'estres_crecimiento_poblacional',
     modulo: 'transversal',
-    nombre: 'Estrés Transversal: Crecimiento Acelerado de la Demanda (+30%)',
-    descripcion: 'Incremento del 30% en hogares demandantes en los barrios de Kennedy en el año 2.',
+    nombre: 'Estrés Transversal: Crecimiento Acelerado de la Demanda (+35%)',
+    descripcion: 'Incremento del 35% en hogares demandantes en Kennedy (de 25,000 kg a 33,750 kg/sem) a partir de la semana 15.',
     parametros_estres: {
-      semana_inicio: 52,
-      factor_demanda: 1.30
+      tipo: 'crecimiento_poblacional',
+      semana_inicio: 15,
+      duracion_semanas: 90,
+      factor_demanda: 1.35
     }
   }
 };

@@ -14,7 +14,7 @@ Diseñar y evaluar un modelo territorial de soberanía alimentaria y soporte soc
 ### 1.2 Objetivos Específicos
 1. **Instituto Biotecnológico de Bavaria Común:** Consolidar Bavaria Común (E19/E20) como clúster de conocimiento, biotecnología aplicada (cultivo de hongos comestibles/medicinales E12, laboratorio de bioinsumos E13 y empaque/distribución E14) y compostaje comunitario (E10).
 2. **Red Descentralizada de Autoproducción y Comercio:** Fortalecer 4 tipologías de huertas urbanas (E01 asentamientos informales, E02 vivienda en altura, E03 baldíos urbanos y E04 ronda/borde del humedal La Vaca y Techo) articuladas a centros de acopio (E06), ferias itinerantes (E08), comedores comunitarios (E09) y tiendas de barrio.
-3. **Restauración del Hábitat Ecosistémico:** Incrementar la conectividad paisajística y el índice de hábitat para proteger y atraer avifauna nativa (Tingua bogotana, colibrí cometa, copetón, garza bueyera y mirla patinaranja).
+3. **Restauración del Hábitat Ecosistémico:** Incrementar la conectividad paisajística y el índice de cobertura vegetal para proteger y fortalecer los corredores biológicos y la biodiversidad urbana nativa.
 
 > **Principio de Evaluación:** El modelo es formal, explícito y evaluable. Está diseñado como herramienta de experimentación ("probar hipótesis y límites, no tener la razón"). Si una propuesta produce tensiones, cuellos de botella o desabastecimiento, ese resultado es académicamente riguroso y analizado como tal.
 
