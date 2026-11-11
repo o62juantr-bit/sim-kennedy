@@ -33,9 +33,9 @@ export class SimulationEngine {
 
     this.activeScenario = 's1_mas_bavaria';
     this.stressScenario = null;
-    this.userParamOverrides = {};
     this.currentSeed = 42;
     this.rng = new RNG(this.currentSeed);
+    this.customParams = {};
 
     this.history = []; // Historial de la corrida activa
   }
@@ -50,8 +50,8 @@ export class SimulationEngine {
     this.stressScenario = ESCENARIOS[stressId] ? ESCENARIOS[stressId].parametros_estres : null;
   }
 
-  setUserParamOverrides(params) {
-    this.userParamOverrides = Object.assign(this.userParamOverrides || {}, params);
+  setCustomParams(params) {
+    this.customParams = Object.assign({}, this.customParams, params);
   }
 
   setSeed(seed) {
@@ -67,15 +67,15 @@ export class SimulationEngine {
 
     const sc = ESCENARIOS[this.activeScenario] || {};
     const baseParams = sc.parametros || {};
-    const params = Object.assign({}, baseParams, this.userParamOverrides || {});
+    const mergedParams = Object.assign({}, baseParams, this.customParams);
 
-    // Resetear cada módulo con los parámetros del escenario y del usuario
-    this.modulos.sim1.reset(params);
-    this.modulos.sim2.reset(params);
-    this.modulos.sim3.reset(params);
-    this.modulos.sim4.reset(params);
-    this.modulos.sim5.reset(params);
-    this.modulos.sim6.reset(params);
+    // Resetear cada módulo con los parámetros consolidados
+    this.modulos.sim1.reset(mergedParams);
+    this.modulos.sim2.reset(mergedParams);
+    this.modulos.sim3.reset(mergedParams);
+    this.modulos.sim4.reset(mergedParams);
+    this.modulos.sim5.reset(mergedParams);
+    this.modulos.sim6.reset(mergedParams);
   }
 
   /**
@@ -88,11 +88,37 @@ export class SimulationEngine {
 
     const sem = this.clock.week;
 
+    // Actualizar parámetros dinámicos sobre la marcha si el usuario los cambió en el panel
+    if (this.customParams.precio_mayorista_kg !== undefined) {
+      this.modulos.sim1.estado.precioMayorista = this.customParams.precio_mayorista_kg;
+    }
+    if (this.customParams.precio_local_kg !== undefined) {
+      this.modulos.sim1.estado.precioLocal = this.customParams.precio_local_kg;
+    }
+    if (this.customParams.tasa_autoconsumo !== undefined) {
+      this.modulos.sim1.estado.tasaAutoconsumo = this.customParams.tasa_autoconsumo;
+    }
+    if (this.customParams.capacidad_acopio_kg_sem !== undefined) {
+      this.modulos.sim1.estado.capacidadAcopioKg = this.customParams.capacidad_acopio_kg_sem;
+    }
+    if (this.customParams.fraccion_desvio_compost_e10 !== undefined) {
+      this.modulos.sim3.params.fraccion_desvio_compost_e10 = this.customParams.fraccion_desvio_compost_e10;
+    }
+    if (this.customParams.medidas_antitrampa !== undefined) {
+      this.modulos.sim4.params.medidas_antitrampa = this.customParams.medidas_antitrampa;
+    }
+    if (this.customParams.modelo !== undefined) {
+      this.modulos.sim5.params.modelo = this.customParams.modelo;
+    }
+    if (this.customParams.proteccion_suelo_activa !== undefined) {
+      this.modulos.sim6.params.proteccion_suelo_activa = this.customParams.proteccion_suelo_activa;
+    }
+
     // 1. Ejecutar Simulación 2 (Conocimiento y Huertas Activas)
     const resSim2 = this.modulos.sim2.step(this.clock, this.rng);
 
     // 2. Ejecutar Simulación 1 (Abastecimiento y Proveedor con balance de masa)
-    // Se sincroniza el número de huertas activas con la difusión de conocimiento
+    // Sincronizar número de huertas activas con la difusión de conocimiento
     this.modulos.sim1.huertas.E01.n = Math.round(resSim2.huertas_activas * 0.40);
     this.modulos.sim1.huertas.E02.n = Math.round(resSim2.huertas_activas * 0.30);
     this.modulos.sim1.huertas.E04.n = Math.round(resSim2.huertas_activas * 0.15);
@@ -101,7 +127,7 @@ export class SimulationEngine {
     // 3. Ejecutar Simulación 3 (Orgánicos y Compostaje con balance de masa)
     const resSim3 = this.modulos.sim3.step(this.clock, this.rng, this.massTracker);
 
-    // 4. Ejecutar Simulación 4 (Hábitat y Fauna)
+    // 4. Ejecutar Simulación 4 (Hábitat y Biodiversidad Urbana)
     const resSim4 = this.modulos.sim4.step(this.clock, this.rng);
 
     // 5. Ejecutar Simulación 5 (Gobernanza)
@@ -119,7 +145,12 @@ export class SimulationEngine {
       sim4: resSim4,
       sim5: resSim5,
       sim6: resSim6,
-      balanceMasaValido: this.massTracker.getEstadoGeneral().esValido
+      balanceMasaValido: this.massTracker.getEstadoGeneral().esValido,
+      estresActivo: !!(this.stressScenario && (
+        (this.stressScenario.tipo === 'choque_corabastos' && sem >= this.stressScenario.semana_inicio && sem < this.stressScenario.semana_inicio + this.stressScenario.duracion_semanas) ||
+        (this.stressScenario.tipo === 'sequia' && sem >= this.stressScenario.semana_inicio && sem < this.stressScenario.semana_inicio + this.stressScenario.duracion_semanas) ||
+        (this.stressScenario.tipo === 'crecimiento_poblacional' && sem >= this.stressScenario.semana_inicio)
+      ))
     };
 
     this.history.push(snapshot);
@@ -169,6 +200,7 @@ export class SimulationEngine {
         ['toneladas_desviadas_acum', r => r.sim3.toneladas_desviadas_acum],
         ['compost_retornado_kg', r => r.sim3.compost_retornado_huertas_kg],
         ['indice_conectividad', r => r.sim4.indice_conectividad],
+        ['biodiversidad_polinizadores', r => r.sim4.biodiversidad_polinizadores],
         ['mortalidad_trampas_acum', r => r.sim4.mortalidad_trampas_acum],
         ['tiempo_decision_sem', r => r.sim5.tiempo_decision_sem],
         ['concentracion_poder_hhi', r => r.sim5.concentracion_poder_hhi],
@@ -202,12 +234,6 @@ export class SimulationEngine {
       agregadas.push(punto);
     }
 
-    return {
-      nSeeds,
-      escenario: this.activeScenario,
-      horizonteSemanas: this.horizonWeeks,
-      series: agregadas,
-      balanceMasaValido: this.massTracker.getEstadoGeneral().esValido
-    };
+    return agregadas;
   }
 }

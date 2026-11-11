@@ -14,7 +14,7 @@ export class Sim2Conocimiento {
       ratio_saturacion_critico: 15,        // Huertas por promotor antes de perder calidad
       tasa_abandono_base: 0.015,           // 1.5% abandono mensual por causas externas
       prob_imitacion_vecinal: 0.035,       // Contagio social por ver huertas activas
-      apoyo_antena_e15: true,              // Si existe antena en E15 (Banco de semillas Tingua Azul)
+      apoyo_antena_e15: true,              // Si existe antena en E15 (Banco Comunitario de Semillas)
       es_cluster: true                     // Clúster completo (E19, E20, E12, E13, E10) vs nodo aislado
     }, config);
 
@@ -66,7 +66,7 @@ export class Sim2Conocimiento {
       calidadAcompanamiento = Math.max(0.25, p.ratio_saturacion_critico / ratioActual);
     }
 
-    // Si cuenta con antena local en E15 (Tingua Azul), la cercanía mitiga un 30% la saturación
+    // Si cuenta con antena local en E15 (Banco de Semillas), la cercanía mitiga un 30% la saturación
     if (p.apoyo_antena_e15) {
       calidadAcompanamiento = Math.min(1.0, calidadAcompanamiento * 1.30);
     }

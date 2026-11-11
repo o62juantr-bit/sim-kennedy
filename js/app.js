@@ -18,31 +18,24 @@ class AppController {
     this.isMonteCarloMode = false;
     this.monteCarloData = null;
 
-    this.initUI();
     this.initViews();
-    this.resetSimulation();
+    this.initUI();
+    // Simular horizonte inicial para mostrar datos activos y planos vivos de inmediato
+    this.recalculateAndRefresh(52);
   }
 
   initViews() {
     this.mapView = new MapView('map-canvas');
     this.view3D = new View3D('view-3d-container');
     this.chartRenderer = new ChartRenderer('chart-canvas');
+    
     this.paramsPanel = new ParamsPanel('params-panel-content', (newParams) => {
-      this.engine.setUserParamOverrides(newParams);
-      const hadHistory = this.engine.history.length > 0;
-      const wasAtEnd = this.engine.clock.isFinished();
-      this.resetSimulation();
-      if (hadHistory && wasAtEnd) {
-        this.engine.runFull();
-        const lastSnap = this.engine.history[this.engine.history.length - 1];
-        this.updateKPIs(lastSnap);
-        this.updateHUD(lastSnap);
-        this.updateCharts();
-      }
-      this.toast('Parámetros aplicados al análisis de sensibilidad');
+      this.engine.setCustomParams(newParams);
+      this.recalculateAndRefresh();
+      this.toast('Parámetros actualizados: impacto reflejado en datos y plano');
     });
 
-    // Render loop para el mapa 2D continuo
+    // Render loop continuo para el plano 2D con animaciones de flujo vivas
     const renderLoop = () => {
       const snap = this.engine.history.length > 0 ? this.engine.history[this.engine.history.length - 1] : null;
       if (this.mapView) this.mapView.render(snap);
@@ -75,7 +68,7 @@ class AppController {
     const selScenario = document.getElementById('select-scenario');
     selScenario.addEventListener('change', (e) => {
       this.engine.setScenario(e.target.value);
-      this.resetSimulation();
+      this.recalculateAndRefresh(52);
       this.toast(`Escenario: ${selScenario.selectedOptions[0].text}`);
     });
 
@@ -84,17 +77,7 @@ class AppController {
       const val = e.target.value;
       if (val === 'ninguno') this.engine.setStressScenario(null);
       else this.engine.setStressScenario(val);
-      
-      const hadHistory = this.engine.history.length > 0;
-      const wasAtEnd = this.engine.clock.isFinished();
-      this.resetSimulation();
-      if (hadHistory && wasAtEnd) {
-        this.engine.runFull();
-        const lastSnap = this.engine.history[this.engine.history.length - 1];
-        this.updateKPIs(lastSnap);
-        this.updateHUD(lastSnap);
-        this.updateCharts();
-      }
+      this.recalculateAndRefresh(52);
       this.toast(val === 'ninguno' ? 'Estrés exógeno desactivado' : `Estrés activo: ${selStress.selectedOptions[0].text}`);
     });
 
@@ -139,20 +122,24 @@ class AppController {
       pill.addEventListener('click', () => {
         pills.forEach(p => p.classList.remove('active'));
         pill.classList.add('active');
-        const view = pill.dataset.view;
-        document.querySelectorAll('.view-layer').forEach(l => l.classList.remove('active'));
-        if (view === '2d') {
+        const viewMode = pill.dataset.view;
+        if (viewMode === '2d') {
           document.getElementById('layer-map-2d').classList.add('active');
-          this.mapView.resize();
+          document.getElementById('layer-view-3d').classList.remove('active');
+          if (this.mapView) this.mapView.resize();
         } else {
+          document.getElementById('layer-map-2d').classList.remove('active');
           document.getElementById('layer-view-3d').classList.add('active');
         }
       });
     });
 
-    // 7. Ejecutor de Pruebas Unitarias
-    document.getElementById('btn-run-tests').addEventListener('click', () => this.runUnitTests());
+    // 7. Botón de Pruebas Unitarias
+    document.getElementById('btn-run-tests').addEventListener('click', () => {
+      this.runUnitTests();
+    });
 
+    // Ajuste responsive de ventana
     window.addEventListener('resize', () => {
       if (this.mapView) this.mapView.resize();
       if (this.chartRenderer) this.chartRenderer.resize();
@@ -169,11 +156,12 @@ class AppController {
 
   play() {
     if (this.engine.clock.isFinished()) {
-      this.resetSimulation();
+      this.engine.reset();
     }
     this.isPlaying = true;
+    this.isMonteCarloMode = false;
     document.getElementById('btn-play').textContent = '⏸ Pausar';
-    document.getElementById('btn-play').classList.add('btn-primary');
+
     this.playInterval = setInterval(() => {
       const snap = this.engine.step();
       if (!snap) {
@@ -184,7 +172,7 @@ class AppController {
         this.updateKPIs(snap);
         this.updateCharts();
       }
-    }, 85); // ~12 semanas por segundo en animación
+    }, 85);
   }
 
   pause() {
@@ -197,8 +185,22 @@ class AppController {
     this.isMonteCarloMode = false;
     this.monteCarloData = null;
     this.engine.reset();
+    const snap = this.engine.step(); // Avanzar 1 semana para poblar el estado
     this.updateHUD();
-    this.updateKPIs(null);
+    this.updateKPIs(snap);
+    this.updateCharts();
+  }
+
+  recalculateAndRefresh(targetWeeks = null) {
+    this.isMonteCarloMode = false;
+    const weeksToSimulate = targetWeeks || (this.engine.clock.week > 0 ? this.engine.clock.week : 52);
+    this.engine.reset();
+    let lastSnap = null;
+    for (let w = 0; w < weeksToSimulate; w++) {
+      lastSnap = this.engine.step();
+    }
+    this.updateHUD();
+    this.updateKPIs(lastSnap);
     this.updateCharts();
   }
 
@@ -226,12 +228,11 @@ class AppController {
       const elapsed = ((performance.now() - startTime) / 1000).toFixed(2);
 
       this.isMonteCarloMode = true;
-      this.monteCarloData = results;
+      this.monteCarloData = { series: results };
       btn.disabled = false;
       btn.textContent = '⚄ Monte Carlo (30 Semillas)';
 
       this.toast(`30 corridas finalizadas en ${elapsed}s con balance de masa verificado`);
-      // Cambiar a pestaña de gráficas para ver la mediana e IQR
       document.querySelector('[data-tab="tab-charts"]').click();
       this.updateCharts();
     }, 30);
@@ -262,8 +263,8 @@ class AppController {
       document.getElementById('kpi-promotores').textContent = 'Promotores: 0';
       document.getElementById('kpi-organicos').textContent = '0.0 Ton';
       document.getElementById('kpi-compost').textContent = 'Compost: 0 kg/sem';
-      document.getElementById('kpi-conectividad-val').textContent = '0.55';
-      document.getElementById('kpi-corredor-sub').textContent = 'Corredores Activos: 85%';
+      document.getElementById('kpi-aves').textContent = '72/100';
+      document.getElementById('kpi-conectividad').textContent = 'Conectividad: 0.55';
       document.getElementById('kpi-tiempo-gob').textContent = '2.0 sem';
       document.getElementById('kpi-poder').textContent = 'HHI Poder: 0.20';
       return;
@@ -280,8 +281,8 @@ class AppController {
     document.getElementById('kpi-organicos').textContent = `${snap.sim3.toneladas_desviadas_acum} Ton`;
     document.getElementById('kpi-compost').textContent = `Compost: ${snap.sim3.compost_maduro_kg.toLocaleString()} kg/sem`;
 
-    document.getElementById('kpi-conectividad-val').textContent = `${snap.sim4.indice_conectividad}`;
-    document.getElementById('kpi-corredor-sub').textContent = `Ocupación: ${snap.sim4.ocupacion_parches_pct}%`;
+    document.getElementById('kpi-aves').textContent = `${snap.sim4.biodiversidad_polinizadores}/100`;
+    document.getElementById('kpi-conectividad').textContent = `Conectividad: ${snap.sim4.indice_conectividad}`;
 
     document.getElementById('kpi-tiempo-gob').textContent = `${snap.sim5.tiempo_decision_sem} sem`;
     document.getElementById('kpi-poder').textContent = `HHI Poder: ${snap.sim5.concentracion_poder_hhi}`;
