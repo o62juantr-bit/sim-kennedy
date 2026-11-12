@@ -471,6 +471,96 @@ input:checked + .toggle-slider:before {
   box-shadow: 0 0 12px rgba(56, 189, 248, 0.4);
 }
 
+/* ============================================================
+   Controles Flotantes de Navegación 2D (Pan & Zoom & Capas)
+   ============================================================ */
+#map-controls-2d {
+  position: absolute;
+  top: 14px;
+  right: 16px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.94);
+  padding: 5px 8px;
+  border-radius: 8px;
+  border: 1px solid rgba(15, 23, 42, 0.25);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+  z-index: 25;
+  backdrop-filter: blur(8px);
+}
+
+.map-ctrl-btn {
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  color: #0f172a;
+  width: 28px;
+  height: 28px;
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.map-ctrl-btn:hover {
+  background: #e2e8f0;
+  border-color: #94a3b8;
+  color: #0284c7;
+}
+
+.map-ctrl-btn.toggle-btn {
+  width: auto;
+  padding: 0 8px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.map-ctrl-btn.toggle-btn.active {
+  background: #0284c7;
+  color: #ffffff;
+  border-color: #0369a1;
+}
+
+.map-ctrl-divider {
+  width: 1px;
+  height: 18px;
+  background: #cbd5e1;
+  margin: 0 2px;
+}
+
+#zoom-level-badge {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  color: #475569;
+  padding: 0 4px;
+  min-width: 38px;
+  text-align: center;
+}
+
+/* Indicador flotante sutil de uso */
+#map-hint-drag {
+  position: absolute;
+  bottom: 54px;
+  left: 18px;
+  background: rgba(255, 255, 255, 0.88);
+  border: 1px solid rgba(15, 23, 42, 0.15);
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: #475569;
+  pointer-events: none;
+  z-index: 20;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
 /* Notificación Flotante (Toast) */
 #toast-notification {
   position: fixed;
