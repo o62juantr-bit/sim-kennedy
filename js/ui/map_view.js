@@ -31,8 +31,26 @@ export class MapView {
     this.hoveredSpace = null;
     this.animTime = 0;
 
+    // Imagen base Sentinel-2 L2A (True Color, 2026-08-10)
+    this.sentinelImg = null;
+    this.sentinelLoaded = false;
+    this._cargarSentinel();
+
     this.setupEvents();
     this.resize();
+  }
+
+  /** Carga asíncrona del basemap Sentinel-2 */
+  _cargarSentinel() {
+    const img = new Image();
+    img.onload = () => {
+      this.sentinelImg = img;
+      this.sentinelLoaded = true;
+    };
+    img.onerror = () => {
+      console.warn('[MapView] No se pudo cargar sentinel_kennedy.png — se usa fondo de papel.');
+    };
+    img.src = 'img/sentinel_kennedy.png';
   }
 
   resize() {
@@ -245,40 +263,70 @@ export class MapView {
     this.animTime += 0.025;
     const ctx = this.ctx;
 
-    // 1. Fondo de papel arquitectónico blanco cálido
+    // 1. Fondo de papel arquitectónico blanco cálido (fallback si no carga Sentinel)
     ctx.fillStyle = '#faf9f5';
     ctx.fillRect(0, 0, this.width, this.height);
 
-    // 2. Grilla milimétrica y retícula sutil de dibujo técnico
+    // 2. Imagen base Sentinel-2 L2A georeferenciada (True Color Kennedy, 2026-08-10)
+    this.renderSentinelBasemap(ctx);
+
+    // 3. Grilla milimétrica sutil (sobre la imagen satelital)
     this.renderTechnicalGrid(ctx);
 
-    // 3. Huella y contornos de humedales (La Vaca, El Burro, Techo)
+    // 4. Huella y contornos de humedales (La Vaca, El Burro, Techo)
     this.renderHumedalesCad(ctx);
 
-    // 4. Red de enlaces topológicos y flujos vivos de la simulación
+    // 5. Red de enlaces topológicos y flujos vivos de la simulación
     this.renderRedYFlujos(ctx, simSnapshot);
 
-    // 5. Pabellón central isométrico (Bavaria Común E19 / Distrito E20)
+    // 6. Pabellón central isométrico (Bavaria Común E19 / Distrito E20)
     this.renderPabellonBavaria(ctx, simSnapshot);
 
-    // 6. Nodos de la red con siluetas e iconografía de collage arquitectónico
+    // 7. Nodos de la red con siluetas e iconografía de collage arquitectónico
     this.renderNodosCollage(ctx, simSnapshot);
 
-    // 7. Indicadores territoriales y alertas de estrés en curso
+    // 8. Indicadores territoriales y alertas de estrés en curso
     this.renderIndicadoresTerritoriales(ctx, simSnapshot);
 
-    // 8. Tooltip informativo arquitectónico al posar el cursor
+    // 9. Tooltip informativo arquitectónico al posar el cursor
     if (this.hoveredSpace) {
       this.renderTooltip(ctx, this.hoveredSpace, simSnapshot);
     }
   }
 
   /**
-   * Retícula técnica de fondo (papel de arquitectura milimetrado)
+   * Renderiza la imagen base Sentinel-2 georeferenciada sobre el bbox de Kennedy.
+   * Respeta pan & zoom porque usa geoToPixel() en las esquinas.
+   */
+  renderSentinelBasemap(ctx) {
+    if (!this.sentinelLoaded || !this.sentinelImg) return;
+    const tl = this.geoToPixel(this.bbox.maxLat, this.bbox.minLon); // esquina superior-izquierda
+    const br = this.geoToPixel(this.bbox.minLat, this.bbox.maxLon); // esquina inferior-derecha
+    const drawW = br.x - tl.x;
+    const drawH = br.y - tl.y;
+    if (drawW <= 0 || drawH <= 0) return;
+    ctx.save();
+    ctx.globalAlpha = 0.88; // leve transparencia para que el collage respire
+    ctx.drawImage(this.sentinelImg, tl.x, tl.y, drawW, drawH);
+    ctx.globalAlpha = 1.0;
+    // Vignette muy suave en los bordes para integrar el paper background
+    const grad = ctx.createRadialGradient(
+      tl.x + drawW / 2, tl.y + drawH / 2, drawH * 0.28,
+      tl.x + drawW / 2, tl.y + drawH / 2, drawH * 0.72
+    );
+    grad.addColorStop(0, 'rgba(250,249,245,0)');
+    grad.addColorStop(1, 'rgba(250,249,245,0.55)');
+    ctx.fillStyle = grad;
+    ctx.fillRect(tl.x, tl.y, drawW, drawH);
+    ctx.restore();
+  }
+
+  /**
+   * Retícula técnica de fondo (papel de arquitectura milimetrado) — sutil sobre satélite
    */
   renderTechnicalGrid(ctx) {
     ctx.save();
-    ctx.strokeStyle = 'rgba(210, 205, 195, 0.45)';
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.18)'; // blanco tenue sobre satélite
     ctx.lineWidth = 0.5;
 
     const step = 40;
@@ -296,7 +344,7 @@ export class MapView {
     }
 
     // Cruces de registro técnico en esquinas de la ventana
-    ctx.strokeStyle = '#9ca3af';
+    ctx.strokeStyle = 'rgba(200,200,200,0.7)';
     ctx.lineWidth = 1;
     const crosses = [
       { x: 30, y: 30 },
@@ -341,9 +389,9 @@ export class MapView {
       ctx.translate(p.x, p.y);
       ctx.rotate(h.rot);
 
-      ctx.fillStyle = 'rgba(224, 242, 254, 0.60)';
-      ctx.strokeStyle = '#0284c7';
-      ctx.lineWidth = Math.max(0.8, 1.2 * Math.min(1.5, this.view.zoom));
+      ctx.fillStyle = 'rgba(224, 242, 254, 0.50)';
+      ctx.strokeStyle = '#38bdf8';
+      ctx.lineWidth = Math.max(1.2, 2.0 * Math.min(1.5, this.view.zoom));
       ctx.setLineDash([4, 3]);
 
       ctx.beginPath();
@@ -353,8 +401,11 @@ export class MapView {
 
       ctx.setLineDash([]);
       ctx.fillStyle = '#0369a1';
+      ctx.shadowColor = 'rgba(255,255,255,0.9)';
+      ctx.shadowBlur = 3;
       ctx.font = `bold ${Math.max(8, 8.5 * Math.min(1.4, this.view.zoom))}px monospace`;
       ctx.fillText(h.n, -scaledRx + 10, 3);
+      ctx.shadowBlur = 0;
       ctx.restore();
     }
     ctx.restore();
@@ -524,8 +575,11 @@ export class MapView {
 
     // Etiqueta tipográfica
     ctx.fillStyle = '#0f172a';
+    ctx.shadowColor = 'rgba(255,255,255,0.9)';
+    ctx.shadowBlur = 4;
     ctx.font = 'bold 9px monospace';
     ctx.fillText('BAVARIA COMÚN • NODO E19', bx, by - 8);
+    ctx.shadowBlur = 0;
 
     ctx.restore();
   }
@@ -556,9 +610,13 @@ export class MapView {
 
       this.drawCollageIcon(ctx, id, esp, isHovered, snap);
 
+      // Etiqueta del nodo con sombra blanca para legibilidad sobre satélite
+      ctx.shadowColor = 'rgba(255,255,255,0.95)';
+      ctx.shadowBlur = 4;
       ctx.fillStyle = '#1e293b';
       ctx.font = 'bold 8.5px monospace';
       ctx.fillText(id, -8, 22);
+      ctx.shadowBlur = 0;
 
       this.drawNodeMetric(ctx, id, snap);
 
@@ -776,6 +834,8 @@ export class MapView {
   drawNodeMetric(ctx, id, snap) {
     if (!snap) return;
     ctx.save();
+    ctx.shadowColor = 'rgba(255,255,255,0.9)';
+    ctx.shadowBlur = 3;
     ctx.font = '8px monospace';
     ctx.fillStyle = '#64748b';
 
