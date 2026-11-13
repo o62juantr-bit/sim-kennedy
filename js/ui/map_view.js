@@ -1,6 +1,6 @@
 /**
  * Visualizador Territorial 2D • Estética Collage Arquitectónico (Kennedy ABM)
- * Con capa de construcciones catastrales (SHP) de Kennedy y navegación interactiva (Pan & Zoom).
+ * Con navegación interactiva fluida (Pan & Zoom centrado en cursor).
  * Integra nodos E01-E20, siluetas de collage, pabellón central isométrico y flujos dinámicos reales.
  */
 
@@ -28,21 +28,11 @@ export class MapView {
       zoom: 1.0
     };
 
-    // Capa de construcciones catastrales (Shapefile)
-    this.showBuildings = true;
-    this.buildingsLoading = false;
-    this.buildingsLoaded = false;
-    this.buildingCount = 0;
-    this.buildingPath = null;
-    this.buildingU16 = null;
-    this.buildingBounds = null;
-
     this.hoveredSpace = null;
     this.animTime = 0;
 
     this.setupEvents();
     this.resize();
-    this.loadBuildings();
   }
 
   resize() {
@@ -50,95 +40,6 @@ export class MapView {
     const rect = this.canvas.parentElement.getBoundingClientRect();
     this.width = this.canvas.width = rect.width;
     this.height = this.canvas.height = rect.height;
-    if (this.buildingU16) {
-      this.rebuildBuildingPath();
-    }
-  }
-
-  /**
-   * Carga asíncrona optimizada del archivo binario de construcciones de Kennedy (SHP)
-   */
-  async loadBuildings() {
-    this.buildingsLoading = true;
-
-    // 1. Intentar carga rápida desde script en memoria si ya está precargado
-    if (window.BUILDINGS_BIN_BASE64) {
-      try {
-        const binStr = atob(window.BUILDINGS_BIN_BASE64);
-        const len = binStr.length;
-        const bytes = new Uint8Array(len);
-        for (let i = 0; i < len; i++) {
-          bytes[i] = binStr.charCodeAt(i);
-        }
-        this.parseBinaryBuildings(bytes.buffer);
-        this.buildingsLoading = false;
-        this.buildingsLoaded = true;
-        this.updateBuildingsBadge();
-        return;
-      } catch (err) {
-        console.warn('Fallback base64 falló, intentando fetch binario...', err);
-      }
-    }
-
-    // 2. Fetch estándar HTTP (GitHub Pages o servidor local)
-    try {
-      const resp = await fetch('data/buildings_kennedy.bin');
-      if (!resp.ok) throw new Error('HTTP ' + resp.status);
-      const buffer = await resp.arrayBuffer();
-      this.parseBinaryBuildings(buffer);
-      this.buildingsLoading = false;
-      this.buildingsLoaded = true;
-      this.updateBuildingsBadge();
-    } catch (e) {
-      console.warn('Nota: buildings_kennedy.bin no cargado directamente:', e);
-      this.buildingsLoading = false;
-    }
-  }
-
-  parseBinaryBuildings(buffer) {
-    const f64 = new Float64Array(buffer, 0, 4);
-    const minLon = f64[0], minLat = f64[1], maxLon = f64[2], maxLat = f64[3];
-    const i32 = new Int32Array(buffer, 32, 1);
-    this.buildingCount = i32[0];
-    this.buildingU16 = new Uint16Array(buffer, 36);
-    this.buildingBounds = { minLon, minLat, maxLon, maxLat };
-    this.rebuildBuildingPath();
-  }
-
-  rebuildBuildingPath() {
-    if (!this.buildingU16 || !this.buildingBounds) return;
-    const { minLon, minLat, maxLon, maxLat } = this.buildingBounds;
-    const u16 = this.buildingU16;
-    const qxToLon = (maxLon - minLon) / 65535.0;
-    const qyToLat = (maxLat - minLat) / 65535.0;
-
-    const path = new Path2D();
-    let idx = 0;
-    const len = u16.length;
-
-    while (idx < len) {
-      const pts = u16[idx++];
-      if (pts < 3) continue;
-
-      const qx0 = u16[idx++];
-      const qy0 = u16[idx++];
-      const lon0 = minLon + qx0 * qxToLon;
-      const lat0 = minLat + qy0 * qyToLat;
-      const p0 = this.baseGeoToPixel(lat0, lon0);
-      path.moveTo(p0.x, p0.y);
-
-      for (let i = 1; i < pts; i++) {
-        const qxi = u16[idx++];
-        const qyi = u16[idx++];
-        const loni = minLon + qxi * qxToLon;
-        const lati = minLat + qyi * qyToLat;
-        const pi = this.baseGeoToPixel(lati, loni);
-        path.lineTo(pi.x, pi.y);
-      }
-      path.closePath();
-    }
-
-    this.buildingPath = path;
   }
 
   // Conversión geográfica base (sin pan ni zoom)
@@ -331,32 +232,13 @@ export class MapView {
     this.updateZoomBadge();
   }
 
-  toggleBuildings() {
-    this.showBuildings = !this.showBuildings;
-    this.updateBuildingsBadge();
-    return this.showBuildings;
-  }
-
   updateZoomBadge() {
     const el = document.getElementById('zoom-level-badge');
     if (el) el.textContent = `${Math.round(this.view.zoom * 100)}%`;
   }
 
-  updateBuildingsBadge() {
-    const btn = document.getElementById('btn-toggle-buildings');
-    if (btn) {
-      if (this.showBuildings) {
-        btn.classList.add('active');
-        btn.textContent = `🏢 SHP (${this.buildingCount > 0 ? (this.buildingCount / 1000).toFixed(0) + 'k' : 'ON'})`;
-      } else {
-        btn.classList.remove('active');
-        btn.textContent = '🏢 SHP OFF';
-      }
-    }
-  }
-
   /**
-   * Bucle principal de renderizado en Canvas
+   * Bucle principal de renderizado en Canvas (60 FPS, ultra-fluido)
    */
   render(simSnapshot = null) {
     if (!this.ctx) return;
@@ -373,47 +255,22 @@ export class MapView {
     // 3. Huella y contornos de humedales (La Vaca, El Burro, Techo)
     this.renderHumedalesCad(ctx);
 
-    // 4. Capa de construcciones catastrales (Shapefile de Kennedy)
-    this.renderBuildingsCad(ctx);
-
-    // 5. Red de enlaces topológicos y flujos vivos de la simulación
+    // 4. Red de enlaces topológicos y flujos vivos de la simulación
     this.renderRedYFlujos(ctx, simSnapshot);
 
-    // 6. Pabellón central isométrico (Bavaria Común E19 / Distrito E20)
+    // 5. Pabellón central isométrico (Bavaria Común E19 / Distrito E20)
     this.renderPabellonBavaria(ctx, simSnapshot);
 
-    // 7. Nodos de la red con siluetas e iconografía de collage arquitectónico
+    // 6. Nodos de la red con siluetas e iconografía de collage arquitectónico
     this.renderNodosCollage(ctx, simSnapshot);
 
-    // 8. Indicadores territoriales y alertas de estrés en curso
+    // 7. Indicadores territoriales y alertas de estrés en curso
     this.renderIndicadoresTerritoriales(ctx, simSnapshot);
 
-    // 9. Tooltip informativo arquitectónico al posar el cursor
+    // 8. Tooltip informativo arquitectónico al posar el cursor
     if (this.hoveredSpace) {
       this.renderTooltip(ctx, this.hoveredSpace, simSnapshot);
     }
-  }
-
-  /**
-   * Dibuja las construcciones del Shapefile de Kennedy en estilo delineado arquitectónico CAD
-   */
-  renderBuildingsCad(ctx) {
-    if (!this.showBuildings || !this.buildingPath) return;
-
-    ctx.save();
-    // Aplicar transformación pan y zoom directamente a la matriz del contexto
-    ctx.translate(this.view.panX, this.view.panY);
-    ctx.scale(this.view.zoom, this.view.zoom);
-
-    // Relleno sutil arquitectónico y contorno fino
-    ctx.fillStyle = 'rgba(215, 222, 230, 0.52)';
-    ctx.strokeStyle = 'rgba(90, 105, 125, 0.40)';
-    ctx.lineWidth = Math.max(0.2, 0.55 / this.view.zoom);
-
-    ctx.fill(this.buildingPath);
-    ctx.stroke(this.buildingPath);
-
-    ctx.restore();
   }
 
   /**
@@ -459,7 +316,7 @@ export class MapView {
     // Marca cartográfica y escala
     ctx.fillStyle = 'rgba(100, 116, 139, 0.45)';
     ctx.font = '9px monospace';
-    const scaleText = `KENNEDY • SHP CATASTRAL (${this.buildingCount.toLocaleString()} EDIFICACIONES) • ZOOM: ${Math.round(this.view.zoom * 100)}%`;
+    const scaleText = `LOCALIDAD DE KENNEDY • CONSTELACIÓN TERRITORIAL Y RED SOCIOECOLÓGICA • ZOOM: ${Math.round(this.view.zoom * 100)}%`;
     ctx.fillText(scaleText, 30, this.height - 14);
     ctx.restore();
   }
@@ -865,7 +722,8 @@ export class MapView {
         ctx.beginPath();
         ctx.moveTo(-2, -10); ctx.lineTo(2, -10);
         ctx.moveTo(0, -10); ctx.lineTo(0, -4);
-        ctx.lineTo(-6, 6); ctx.lineTo(6, 6); ctx.lineTo(0, -4);
+        ctx.lineTo(-6, 6); ctx.lineTo(6, 6);
+        ctx.lineTo(0, -4);
         ctx.stroke();
         break;
       }
@@ -883,7 +741,8 @@ export class MapView {
         ctx.arc(0, -10, 3, 0, Math.PI * 2);
         ctx.fill();
         ctx.beginPath();
-        ctx.moveTo(0, -7); ctx.lineTo(0, 2); ctx.lineTo(-3, 8);
+        ctx.moveTo(0, -7); ctx.lineTo(0, 2);
+        ctx.lineTo(-3, 8);
         ctx.moveTo(0, 2); ctx.lineTo(3, 8);
         ctx.stroke();
         ctx.fillStyle = '#16a34a';

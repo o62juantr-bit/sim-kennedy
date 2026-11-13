@@ -134,7 +134,7 @@ class AppController {
       });
     });
 
-    // 7. Controles interactivos del plano 2D (Pan, Zoom, Capa SHP)
+    // 7. Controles interactivos del plano 2D (Pan & Zoom)
     document.getElementById('btn-zoom-in')?.addEventListener('click', () => {
       this.mapView?.zoomIn();
     });
@@ -143,10 +143,6 @@ class AppController {
     });
     document.getElementById('btn-zoom-reset')?.addEventListener('click', () => {
       this.mapView?.resetView();
-    });
-    document.getElementById('btn-toggle-buildings')?.addEventListener('click', () => {
-      const active = this.mapView?.toggleBuildings();
-      this.toast(active ? 'Capa de construcciones catastrales (SHP) activada' : 'Capa de construcciones desactivada');
     });
 
     // 8. Botón de Pruebas Unitarias

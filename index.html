@@ -70,13 +70,11 @@
         <div id="layer-map-2d" class="view-layer active">
           <canvas id="map-canvas" class="display-canvas"></canvas>
 
-          <!-- Barra flotante de navegación CAD (Pan, Zoom, Capas) -->
+          <!-- Barra flotante de navegación CAD (Pan & Zoom) -->
           <div id="map-controls-2d">
             <button class="map-ctrl-btn" id="btn-zoom-in" title="Acercar (Zoom In)">＋</button>
             <button class="map-ctrl-btn" id="btn-zoom-out" title="Alejar (Zoom Out)">－</button>
             <button class="map-ctrl-btn" id="btn-zoom-reset" title="Centrar Kennedy">⛶</button>
-            <div class="map-ctrl-divider"></div>
-            <button class="map-ctrl-btn toggle-btn active" id="btn-toggle-buildings" title="Activar/Desactivar Construcciones (SHP)">🏢 SHP</button>
             <div id="zoom-level-badge">100%</div>
           </div>
 
@@ -213,9 +211,6 @@
     <!-- Notificación Flotante (Toast) -->
     <div id="toast-notification">Notificación</div>
   </div>
-
-  <!-- Datos auxiliares de construcciones (fallback offline) -->
-  <script src="data/buildings_data.js"></script>
 
   <!-- Entrada Modular ES6 -->
   <script type="module" src="js/app.js"></script>
