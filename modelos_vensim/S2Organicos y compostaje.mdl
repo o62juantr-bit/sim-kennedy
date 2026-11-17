@@ -1,0 +1,493 @@
+{UTF-8}
+Fertilidad del suelo  = A FUNCTION OF( Mejora de fertilidad) ~~|
+Fertilidad del suelo = INTEG(Mejora de fertilidad - FLO23 Extraccion de fertilidad, 0.5\
+		)
+	~	Dmnl
+	~	Stock. Sube con compost, baja con extraccion. R1.
+	|
+
+Compost maduro  = A FUNCTION OF( Maduracion del compost) ~~|
+Compost maduro = INTEG(Maduracion del compost - FLO12 Compost entregado a huertas, 0)
+	~	kg
+	~	Stock. Graficas G9.
+	|
+
+Organicos en la estacion  = A FUNCTION OF( Organicos recibidos por desvio) ~~|
+Organicos en la estacion = INTEG(Organicos recibidos por desvio - Procesado a compost\
+		 - FLO13 Sustrato al distrito de hongos
+, 0)
+	~	t
+	~	Stock. En la tabla esta en kg; aqui en toneladas para coincidir con FLI07 \
+		en t/semana. Graficas G12.
+	|
+
+Inventario de proteina de hongos  = A FUNCTION OF( Hongos frescos) ~~|
+Inventario de proteina de hongos = INTEG(Hongos frescos - Venta de hongos - FLO15 Merma de hongos\
+		, 0)
+	~	kg
+	~	Stock. Grafica G11.
+	|
+
+Organicos que salen del barrio acumulado = INTEG(Organicos por la ruta actual, 0)
+	~	t
+	~	Stock. Ruta actual.
+	|
+
+Generacion de organicos = Organicos per capita*Poblacion Kennedy*7/1000
+	~	t/Week
+	~	Auxiliar. Grafica G8. 2.571 t/semana (367 t/dia).
+	|
+
+Organicos recibidos por desvio = MIN(Fraccion desviada*Generacion de organicos,Capacidad de la estacion\
+		)
+	~	t/Week
+	~	Flujo. Graficas G8, G10. MIN(PAR08 x generacion, PAR14).
+	|
+
+Organicos por la ruta actual = Generacion de organicos-Organicos recibidos por desvio
+	~	t/Week
+	~	Flujo. Grafica G8.
+	|
+
+Procesado a compost = Organicos en la estacion*(1-Fraccion de sustrato al distrito*Fraccion del organico apta como sustrato\
+		)/Tiempo de proceso en estacion
+	~	t/Week
+	~	Flujo. Flujo agregado para cerrar el stock (no esta en la tabla).
+	|
+
+Sustrato al distrito de hongos = Organicos en la estacion*Fraccion de sustrato al distrito\
+		*Fraccion del organico apta como sustrato/Tiempo de proceso en estacion
+	~	t/Week
+	~	Flujo. Solo con control de calidad. B 2%, C 5%.
+	|
+
+Maduracion del compost = DELAY3(Procesado a compost*1000*Compost por kg de organico,Retardo de maduracion tau\
+		)
+	~	kg/Week
+	~	Flujo. Grafica G9. Madurado(t) = K14 x procesado(t - tau).
+	|
+
+Compost entregado a huertas = MIN(Compost maduro/TIME STEP,Compost maximo absorbible*\
+		1000)
+	~	kg/Week
+	~	Flujo. Graficas G9. MIN(maduro, STK01 x K13 / 52).
+	|
+
+Hongos frescos = Sustrato al distrito de hongos*1000*Fraccion seca del sustrato*Rendimiento biologico de hongos
+	~	kg/Week
+	~	Flujo. Grafica G11. Sustrato x K21 x K20.
+	|
+
+Venta de hongos = MIN(Demanda de hongos*Precio relativo de hongos,0.5*Inventario de proteina de hongos\
+		/TIME STEP)
+	~	kg/Week
+	~	Flujo. Demanda x precio relativo.
+	|
+
+Merma de hongos = Inventario de proteina de hongos/Vida util de hongos
+	~	kg/Week
+	~	Flujo. STK09 / vida util.
+	|
+
+Mejora de fertilidad = (1-Fertilidad del suelo)*Coeficiente de mejora de fertilidad*MIN\
+		(1,ZIDZ(Compost entregado a huertas*52,Area de huertas desde S1*Dosis de compost por m2\
+		))
+	~	Dmnl/Week
+	~	Flujo. R1 (CL-39, hipotesis): compost entregado / dosis.
+	|
+
+Extraccion de fertilidad = Fertilidad del suelo*Tasa de extraccion de fertilidad
+	~	Dmnl/Week
+	~	Flujo. Baja con extraccion por cosecha.
+	|
+
+Ocupacion de la estacion = ZIDZ(Organicos en la estacion,Capacidad de la estacion*Tiempo de proceso en estacion\
+		)
+	~	Dmnl
+	~	Auxiliar. Grafica G12. Si pasa de 1 el exceso sigue la ruta actual.
+	|
+
+Personas cuyo residuo se aprovecha = Organicos recibidos por desvio*1000/(Organicos per capita\
+		*7)
+	~	persona
+	~	Auxiliar. Grafica G10.
+	|
+
+Retorno al suelo = ZIDZ(Compost entregado a huertas,Organicos recibidos por desvio*1000\
+		)
+	~	Dmnl
+	~	Auxiliar. FLO12 / FLI07.
+	|
+
+Rendimiento efectivo con compost = Rendimiento por area*(1+Efecto de fertilidad sobre rendimiento\
+		*(Fertilidad del suelo-0.5))
+	~	kg/m2/Year
+	~	Auxiliar. Cierra R1: el compost devuelve rendimiento a S1.
+	|
+
+Produccion de huertas con compost = Area de huertas desde S1*Rendimiento efectivo con compost\
+		/52
+	~	kg/Week
+	~	Reportero de grafica. Referencia para S1.
+	|
+
+Generacion diaria = Organicos per capita*Poblacion Kennedy/1000
+	~	t/Day
+	~	Reportero de grafica. Grafica G8. 367,3 t/dia.
+	|
+
+Compost maximo absorbible = Area de huertas desde S1*Dosis de compost por m2/52/1000
+	~	t/Week
+	~	Reportero de grafica. Grafica G9. B 24,1 y C 51,9 t/semana.
+	|
+
+Organicos necesarios = Compost maximo absorbible/Compost por kg de organico
+	~	t/Week
+	~	Reportero de grafica. Grafica G9. B 48,2 y C 103,8 t/semana.
+	|
+
+Hongos frescos anuales = Hongos frescos*52/1000
+	~	t/Year
+	~	Reportero de grafica. Grafica G11. Techo con PAR16 = 1.
+	|
+
+Escenario S2 = 2
+	~	Dmnl
+	~	Parametro o constante. 1 = A ruta actual, 2 = B compostaje comunitario \
+		E10, 3 = C compostaje en Bavaria Comun.
+	|
+
+Poblacion Kennedy = 1.03429e+06
+	~	persona
+	~	Parametro o constante. V.
+	|
+
+Residuos en Doña Juana Bogota = 5600
+	~	t/Day
+	~	Parametro o constante. V Alcaldia 2026.
+	|
+
+Fraccion organica = 0.5
+	~	Dmnl
+	~	Parametro o constante. V mas del 50%.
+	|
+
+Poblacion Bogota = 7.88393e+06
+	~	persona
+	~	Parametro o constante. V, confirmar en DANE.
+	|
+
+Organicos per capita = Residuos en Doña Juana Bogota*Fraccion organica*1000/Poblacion Bogota
+	~	kg/persona/Day
+	~	Parametro o constante. D = K08 x K09 / K10 = 0,355.
+	|
+
+Dosis de compost por m2 = 10
+	~	kg/m2/Year
+	~	Parametro o constante. V externa La Habana.
+	|
+
+Compost por kg de organico = 0.5
+	~	Dmnl
+	~	Parametro o constante. S.
+	|
+
+Fraccion seca del sustrato = 0.3
+	~	Dmnl
+	~	Parametro o constante. S.
+	|
+
+Area de huertas desde S1 = IF THEN ELSE(Escenario S2=1,0,IF THEN ELSE(Escenario S2=2,\
+		125309,269998))
+	~	m2
+	~	Parametro o constante. Entrada desde S1 (A 0, B 125.309, C 269.998).
+	|
+
+Rendimiento por area = 6
+	~	kg/m2/Year
+	~	Parametro o constante. 1, 3, 6 o 12.
+	|
+
+Fraccion desviada = IF THEN ELSE(Escenario S2=1,0,IF THEN ELSE(Escenario S2=2,0.02,0.05\
+		))
+	~	Dmnl
+	~	Parametro o constante. Slider 0 a 0,6. G8 usa 0,02 (S).
+	|
+
+Rendimiento biologico de hongos = 0.45
+	~	Dmnl
+	~	Parametro o constante. = K20, rango 0,25 a 0,65.
+	|
+
+Capacidad de la estacion = IF THEN ELSE(Escenario S2=1,0,IF THEN ELSE(Escenario S2=2,\
+		20,80))
+	~	t/Week
+	~	Parametro o constante. Por definir (S).
+	|
+
+Fraccion del organico apta como sustrato = 1
+	~	Dmnl
+	~	Parametro o constante. Por definir. 1 = techo teorico.
+	|
+
+Fraccion de sustrato al distrito = IF THEN ELSE(Escenario S2=2,0.02,IF THEN ELSE(Escenario S2\
+		=3,0.05,0))
+	~	Dmnl
+	~	Parametro o constante. B 2%, C 5%.
+	|
+
+Tiempo de proceso en estacion = 4
+	~	Week
+	~	Parametro o constante. S.
+	|
+
+Retardo de maduracion tau = 12
+	~	Week
+	~	Parametro o constante. S.
+	|
+
+Demanda de hongos = 1500
+	~	kg/Week
+	~	Parametro o constante. S.
+	|
+
+Precio relativo de hongos = 1
+	~	Dmnl
+	~	Parametro o constante. S.
+	|
+
+Vida util de hongos = 2
+	~	Week
+	~	Parametro o constante. S.
+	|
+
+Coeficiente de mejora de fertilidad = 0.01
+	~	1/Week
+	~	Parametro o constante. S.
+	|
+
+Tasa de extraccion de fertilidad = 0.003
+	~	1/Week
+	~	Parametro o constante. S.
+	|
+
+Efecto de fertilidad sobre rendimiento = 0.5
+	~	Dmnl
+	~	Parametro o constante. S.
+	|
+
+********************************************************
+	.Control
+********************************************************~
+		Simulation Control Parameters
+	|
+
+FINAL TIME  = 520
+	~	Week
+	~	The final time for the simulation.
+	|
+
+INITIAL TIME  = 0
+	~	Week
+	~	The initial time for the simulation.
+	|
+
+SAVEPER  = 
+        TIME STEP
+	~	Week [0,?]
+	~	The frequency with which output is stored.
+	|
+
+TIME STEP  = 0.25
+	~	Week [0,?]
+	~	The time step for the simulation.
+	|
+
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*S2 Organicos y compostaje
+$192-192-192,0,Times New Roman|10||0-0-0|0-0-0|0-0-255|-1--1--1|-1--1--1|96,96,80,0
+10,1,Organicos en la estacion,1187,830,104,14,3,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,2,Compost maduro,1827,830,72,14,3,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,3,Inventario de proteina de hongos,572,515,129,14,3,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,4,Organicos que salen del barrio acumulado,1459,937,61,19,3,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,5,Fertilidad del suelo,2467,830,91,14,3,3,0,0,0,0,0,0,0,0,0,0,0,0
+11,6,0,1013,834,6,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,7,Organicos recibidos por desvio,1013,865,57,23,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+11,8,0,1338,932,6,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,9,Organicos por la ruta actual,1338,968,57,28,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+11,10,0,1355,834,6,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,11,Procesado a compost,1355,856,50,14,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+11,12,0,1220,734,6,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,13,Sustrato al distrito de hongos,1220,766,52,24,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+11,14,0,1677,835,6,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,15,Maduracion del compost,1677,866,49,23,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+11,16,0,1980,827,6,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,17,Compost entregado a huertas,1980,862,62,27,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+11,18,0,329,515,6,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,19,Hongos frescos,329,531,72,8,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+11,20,0,786,512,6,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,21,Venta de hongos,786,556,36,36,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+11,22,0,571,416,6,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,23,Merma de hongos,571,432,75,8,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+11,24,0,2293,833,6,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,25,Mejora de fertilidad,2293,863,45,22,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+11,26,0,2709,827,6,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,27,Extraccion de fertilidad,2709,862,55,27,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+12,28,48,947,830,10,8,0,3,0,0,0,0,0,0,0,0,0,0,0,0
+12,29,48,1266,930,10,8,0,3,0,0,0,0,0,0,0,0,0,0,0,0
+12,30,48,1427,834,10,8,0,3,0,0,0,0,0,0,0,0,0,0,0,0
+12,31,48,1220,667,10,8,0,3,0,0,0,0,0,0,0,0,0,0,0,0
+12,32,48,1587,830,10,8,0,3,0,0,0,0,0,0,0,0,0,0,0,0
+12,33,48,2067,827,10,8,0,3,0,0,0,0,0,0,0,0,0,0,0,0
+12,34,48,235,515,10,8,0,3,0,0,0,0,0,0,0,0,0,0,0,0
+12,35,48,881,512,10,8,0,3,0,0,0,0,0,0,0,0,0,0,0,0
+12,36,48,752,383,10,8,0,3,0,0,0,0,0,0,0,0,0,0,0,0
+12,37,48,2227,830,10,8,0,3,0,0,0,0,0,0,0,0,0,0,0,0
+12,38,48,2871,827,10,8,0,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,39,Generacion de organicos,1128,979,52,26,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,40,Ocupacion de la estacion,1195,612,38,16,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,41,Personas cuyo residuo se aprovecha,750,854,54,20,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,42,Retorno al suelo,1629,580,78,8,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,43,Rendimiento efectivo con compost,2502,623,56,20,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,44,Produccion de huertas con compost,2383,359,61,27,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,45,Generacion diaria,1011,1153,37,13,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,46,Compost maximo absorbible,2311,569,56,33,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,47,Organicos necesarios,2001,371,48,24,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,48,Hongos frescos anuales,259,406,44,22,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,49,Escenario S2,1524,443,46,8,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,50,Poblacion Kennedy,1137,1118,30,22,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,51,Residuos en Doña Juana Bogota,884,882,55,28,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,52,Fraccion organica,998,1024,35,22,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,53,Poblacion Bogota,933,1074,39,31,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,54,Organicos per capita,939,962,84,8,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,55,Dosis de compost por m2,2344,691,51,29,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,56,Compost por kg de organico,1807,575,43,18,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,57,Fraccion seca del sustrato,200,718,41,20,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,58,Area de huertas desde S1,1997,538,48,17,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,59,Rendimiento por area,2634,579,37,35,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,60,Fraccion desviada,1135,386,38,18,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,61,Rendimiento biologico de hongos,354,343,62,23,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,62,Capacidad de la estacion,1255,464,40,16,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,63,Fraccion del organico apta como sustrato,1500,704,62,27,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,64,Fraccion de sustrato al distrito,1337,749,51,22,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,65,Tiempo de proceso en estacion,1532,527,50,21,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,66,Retardo de maduracion tau,1565,756,51,22,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,67,Demanda de hongos,965,478,38,19,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,68,Precio relativo de hongos,720,678,43,22,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,69,Vida util de hongos,456,408,36,20,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,70,Coeficiente de mejora de fertilidad,2358,930,55,27,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,71,Tasa de extraccion de fertilidad,2802,954,53,26,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,72,Efecto de fertilidad sobre rendimiento,2678,725,60,24,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+1,73,6,1,4,0,0,22,0,0,0,-1--1--1,,1|(1051,834)|
+1,74,28,6,100,0,0,22,0,0,0,-1--1--1,,1|(982,834)|
+1,75,8,4,4,0,0,22,0,0,0,-1--1--1,,1|(1371,932)|
+1,76,29,8,100,0,0,22,0,0,0,-1--1--1,,1|(1304,932)|
+1,77,10,30,4,0,0,22,0,0,0,-1--1--1,,1|(1389,834)|
+1,78,1,10,100,0,0,22,0,0,0,-1--1--1,,1|(1320,834)|
+1,79,12,31,4,0,0,22,0,0,0,-1--1--1,,1|(1220,700)|
+1,80,1,12,100,0,0,22,0,0,0,-1--1--1,,1|(1220,779)|
+1,81,14,2,4,0,0,22,0,0,0,-1--1--1,,1|(1719,835)|
+1,82,32,14,100,0,0,22,0,0,0,-1--1--1,,1|(1634,835)|
+1,83,16,33,4,0,0,22,0,0,0,-1--1--1,,1|(2021,827)|
+1,84,2,16,100,0,0,22,0,0,0,-1--1--1,,1|(1936,827)|
+1,85,18,3,4,0,0,22,0,0,0,-1--1--1,,1|(389,515)|
+1,86,34,18,100,0,0,22,0,0,0,-1--1--1,,1|(284,515)|
+1,87,20,35,4,0,0,22,0,0,0,-1--1--1,,1|(832,512)|
+1,88,3,20,100,0,0,22,0,0,0,-1--1--1,,1|(741,512)|
+1,89,22,36,4,0,0,22,0,0,0,-1--1--1,,1|(752,416)|
+1,90,3,22,100,0,0,22,0,0,0,-1--1--1,,1|(571,462)|
+1,91,24,5,4,0,0,22,0,0,0,-1--1--1,,1|(2337,833)|
+1,92,37,24,100,0,0,22,0,0,0,-1--1--1,,1|(2262,833)|
+1,93,26,38,4,0,0,22,0,0,0,-1--1--1,,1|(2788,827)|
+1,94,5,26,100,0,0,22,0,0,0,-1--1--1,,1|(2630,827)|
+1,95,50,39,1,0,43,0,0,192,0,-1--1--1,,1|(1151,1048)|
+1,96,54,39,1,0,43,0,0,192,0,-1--1--1,,1|(1033,951)|
+1,97,39,6,1,0,43,0,0,192,0,-1--1--1,,1|(1045,932)|
+1,98,60,6,1,0,43,0,0,192,0,-1--1--1,,1|(999,558)|
+1,99,62,6,1,0,43,0,0,192,0,-1--1--1,,1|(1070,568)|
+1,100,6,8,1,0,45,0,0,192,0,-1--1--1,,1|(1150,935)|
+1,101,39,8,1,0,43,0,0,192,0,-1--1--1,,1|(1238,981)|
+1,102,64,10,1,0,45,0,0,192,0,-1--1--1,,1|(1319,810)|
+1,103,63,10,1,0,45,0,0,192,0,-1--1--1,,1|(1449,781)|
+1,104,65,10,0,0,45,0,0,192,0,-1--1--1,,1|(0,0)|
+1,105,64,12,1,0,43,0,0,192,0,-1--1--1,,1|(1265,727)|
+1,106,63,12,1,0,43,0,0,192,0,-1--1--1,,1|(1322,693)|
+1,107,65,12,0,0,45,0,0,192,0,-1--1--1,,1|(0,0)|
+1,108,10,14,1,0,43,0,0,192,0,-1--1--1,,1|(1519,891)|
+1,109,56,14,1,0,43,0,0,192,0,-1--1--1,,1|(1767,718)|
+1,110,66,14,1,0,45,0,0,192,0,-1--1--1,,1|(1639,765)|
+1,111,46,16,1,0,43,0,0,192,0,-1--1--1,,1|(2111,664)|
+1,112,12,18,1,0,43,0,0,192,0,-1--1--1,,1|(743,744)|
+1,113,57,18,1,0,43,0,0,192,0,-1--1--1,,1|(302,656)|
+1,114,61,18,1,0,43,0,0,192,0,-1--1--1,,1|(377,432)|
+1,115,67,20,1,0,43,0,0,192,0,-1--1--1,,1|(875,439)|
+1,116,68,20,1,0,43,0,0,192,0,-1--1--1,,1|(723,587)|
+1,117,69,22,1,0,45,0,0,192,0,-1--1--1,,1|(513,373)|
+1,118,70,24,1,0,43,0,0,192,0,-1--1--1,,1|(2341,873)|
+1,119,16,24,1,0,43,0,0,192,0,-1--1--1,,1|(2121,765)|
+1,120,55,24,1,0,45,0,0,192,0,-1--1--1,,1|(2326,774)|
+1,121,58,24,1,0,45,0,0,192,0,-1--1--1,,1|(2205,642)|
+1,122,5,24,0,0,45,0,0,192,0,-1--1--1,,1|(0,0)|
+1,123,71,26,1,0,43,0,0,192,0,-1--1--1,,1|(2788,881)|
+1,124,62,40,1,0,45,0,0,192,0,-1--1--1,,1|(1193,544)|
+1,125,1,40,1,0,43,0,0,192,0,-1--1--1,,1|(1153,723)|
+1,126,65,40,1,0,45,0,0,192,0,-1--1--1,,1|(1363,530)|
+1,127,6,41,1,0,43,0,0,192,0,-1--1--1,,1|(905,807)|
+1,128,54,41,1,0,45,0,0,192,0,-1--1--1,,1|(828,939)|
+1,129,6,42,1,0,45,0,0,192,0,-1--1--1,,1|(1256,617)|
+1,130,16,42,1,0,43,0,0,192,0,-1--1--1,,1|(1851,670)|
+1,131,72,43,1,0,43,0,0,192,0,-1--1--1,,1|(2571,703)|
+1,132,59,43,1,0,43,0,0,192,0,-1--1--1,,1|(2557,570)|
+1,133,5,43,1,0,43,0,0,192,0,-1--1--1,,1|(2515,722)|
+1,134,43,44,1,0,43,0,0,192,0,-1--1--1,,1|(2492,513)|
+1,135,58,44,1,0,43,0,0,192,0,-1--1--1,,1|(2156,396)|
+1,136,50,45,1,0,43,0,0,192,0,-1--1--1,,1|(1088,1157)|
+1,137,54,45,1,0,43,0,0,192,0,-1--1--1,,1|(880,1049)|
+1,138,55,46,1,0,43,0,0,192,0,-1--1--1,,1|(2366,637)|
+1,139,58,46,1,0,43,0,0,192,0,-1--1--1,,1|(2130,463)|
+1,140,46,47,1,0,43,0,0,192,0,-1--1--1,,1|(2229,388)|
+1,141,56,47,1,0,45,0,0,192,0,-1--1--1,,1|(1866,440)|
+1,142,18,48,1,0,43,0,0,192,0,-1--1--1,,1|(281,484)|
+1,143,51,54,1,0,43,0,0,192,0,-1--1--1,,1|(933,915)|
+1,144,52,54,1,0,43,0,0,192,0,-1--1--1,,1|(977,983)|
+1,145,53,54,1,0,45,0,0,192,0,-1--1--1,,1|(951,1028)|
+1,146,49,58,1,0,43,0,0,192,0,-1--1--1,,1|(1772,425)|
+1,147,49,60,1,0,43,0,0,192,0,-1--1--1,,1|(1332,328)|
+1,148,49,62,1,0,43,0,0,192,0,-1--1--1,,1|(1406,395)|
+1,149,49,64,1,0,43,0,0,192,0,-1--1--1,,1|(1400,504)|
+10,150,TIME STEP,1982,981,31,22,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,151,150,17,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+10,152,TIME STEP,856,646,31,22,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,153,152,21,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+///---\\\
+:L<%^E!@
+5:Personas cuyo residuo se aprovecha
+19:80,0
+24:0
+25:0
+26:0
+23:0
+15:0,0,0,0,0,0
+27:0,
+34:0,
+42:0
+72:0
+73:0
+95:0
+96:0
+97:0
+77:0
+78:0
+102:1
+93:0
+94:0
+92:0
+91:0
+90:0
+87:0
+75:
+43:
+103:8,8,8,3,8
+105:0,0,0,0,0,0,0,0,0,0
+104:Vensim Sans|12||0-0-0|0-0-0|-1--1--1|0-0-255|192-192-192|-1--1--1

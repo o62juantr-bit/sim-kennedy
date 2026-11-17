@@ -1,0 +1,1164 @@
+{UTF-8}
+STK01 Huertas activas  = A FUNCTION OF( -Area meta,FLI01 Apertura de huertas) ~~|
+STK01 Huertas activas = INTEG(FLI01 Apertura de huertas - FLO01 Cierre de huertas, 0.02\
+		*Area meta)
+	~	m2
+	~	Stock. Graficas G1, G2, G5, G7. Valor inicial = 2% del area meta del \
+		escenario. La tabla da el area meta: A 0, B 125.309, C 269.998 m2.
+	|
+
+Producto en acopio  = A FUNCTION OF( Excedente al acopio,-Compras locales) ~~|
+Producto en acopio = INTEG(Excedente al acopio - Compras locales - FLO06 Venta en feria\
+		 - FLO07 Merma en acopio
+, 100)
+	~	kg
+	~	Stock. Bucle B4. Valor inicial 100 (S).
+	|
+
+Capacidad de acopio y reparto  = A FUNCTION OF( Ampliacion de acopio) ~~|
+Capacidad de acopio y reparto = INTEG(Ampliacion de acopio - Desgaste del equipamiento\
+		, 5000)
+	~	kg/Week
+	~	Stock. Maximo que maneja el equipo rotativo N-08. Valor inicial por \
+		estimar (S).
+	|
+
+Promotores activos  = A FUNCTION OF( Formacion de promotores) ~~|
+Promotores activos = INTEG(Formacion de promotores - Retiro de promotores, 6)
+	~	persona
+	~	Stock. Formados en Bavaria N-21. Bucles R3 y B5. Valor inicial 6 (S).
+	|
+
+Cosecha disponible  = A FUNCTION OF( Produccion) ~~|
+Cosecha disponible = INTEG(Produccion - FLO02 Autoconsumo - Excedente al acopio - FLO04 Merma en huerta
+, 300)
+	~	kg
+	~	Stock. Grafica G1. Valor inicial 300 (S).
+	|
+
+Ingreso acumulado  = A FUNCTION OF( Ingreso por ventas,-Reinversión) ~~|
+Ingreso acumulado = INTEG(Ingreso por ventas - Reinversion, 100000)
+	~	COP
+	~	Stock. Caja de la red. Valor inicial 100.000 (S).
+	|
+
+Participantes activos  = A FUNCTION OF( -Area meta,Incorporacion de participantes,-m2 por huertero\
+		) ~~|
+Participantes activos = INTEG(Incorporacion de participantes - FLO09 Retiro de participantes\
+		, 0.02*Area meta
+/m2 por huertero)
+	~	persona
+	~	Stock. Graficas G4, G7. El valor de la tabla (B 2.506, C 5.400) es el \
+		techo N de adopcion; aqui se parte del 2% del techo.
+	|
+
+Solicitudes decididas  = A FUNCTION OF( Capacidad de decision mu,Solicitudes pendientes\
+		,TIME STEP) ~~|
+Solicitudes decididas = MIN(Capacidad de decision mu,ZIDZ(Solicitudes pendientes,TIME STEP\
+		)+FLI11 Llegada de solicitudes
+)
+	~	solicitud/Week
+	~	Flujo. Central: mu c. Rotativo: asambleas x mu a x (1 - perdida por \
+		relevo). Escenario A sin decision.
+	|
+
+Solicitudes pendientes  = A FUNCTION OF( Llegada de solicitudes) ~~|
+Solicitudes pendientes = INTEG(Llegada de solicitudes - FLO18 Solicitudes decididas, \
+		0)
+	~	solicitud
+	~	Stock. Cola de pedidos sobre cupos, suelo, acopio o presupuesto. Grafica \
+		G6.
+	|
+
+Conocimiento compartido  = A FUNCTION OF( Formacion e intercambio de semillas) ~~|
+Conocimiento compartido = INTEG(Formacion e intercambio de semillas - Perdida de conocimiento\
+		, 0.1)
+	~	Dmnl
+	~	Stock. Indice 0 a 1. Bucle R2. Valor inicial 0,10 (S).
+	|
+
+Ampliacion de acopio  = A FUNCTION OF( Costo por kg semana de capacidad,Presupuesto publico\
+		,Fraccion de presupuesto a acopio,Fraccion de reinversion a capacidad,Reinversión)\
+		 ~~|
+Ampliacion de acopio = (Reinversion*Fraccion de reinversion a capacidad+Presupuesto publico\
+		/52*Fraccion de presupuesto a acopio
+)/Costo por kg semana de capacidad
+	~	kg/Week/Week
+	~	Flujo. Reinversion FLO10 y parte del presupuesto publico EXO03. Bucle R1.
+	|
+
+Incorporacion de participantes  = A FUNCTION OF( Adopcion espontanea efectiva,Bass q,\
+		Retardo de aprendizaje,Techo de huerteros N) ~~|
+Incorporacion de participantes = SMOOTH(MAX(0,(Adopcion espontanea efectiva+Bass q*ZIDZ\
+		(STK05 Participantes activos
+,Techo de huerteros N))*(Techo de huerteros N-STK05 Participantes activos)),Retardo de aprendizaje\
+		*4.33)
+	~	persona/Week
+	~	Flujo. Grafica G4. Difusion tipo Bass con retardo de aprendizaje PAR07 \
+		(meses a semanas x 4,33).
+	|
+
+Reinversión  = A FUNCTION OF( Fraccion reinvertida)
+	~	
+	~		|
+
+FLI01 Apertura de huertas = Promotores activos*m2 abiertos por promotor*Disponibilidad de suelo\
+		*AUX08 Calidad de manejo*Efecto conocimiento sobre apertura*Efecto de la norma de ronda\
+		*Efecto de cola de decision*Margen de crecimiento*Efecto de participantes disponibles
+	~	m2/Week
+	~	Flujo. Tabla: STK11 x m2 por promotor x AUX01 x AUX08 x norma de ronda. Se \
+		agregan efecto del conocimiento STK07 (R2), de la cola de decision (P6) y \
+		el margen hasta el area meta.
+	|
+
+Produccion = STK01 Huertas activas*PAR01 Rendimiento por area/52*Clima*AUX08 Calidad de manejo
+	~	kg/Week
+	~	Flujo. Grafica G1.
+	|
+
+Ingreso por ventas = (Compras locales+FLO06 Venta en feria)*Precio de excedentes*Precio mayorista base
+	~	COP/Week
+	~	Flujo. Tabla: (FLO05+FLO06) x PAR05. Se multiplica por el precio mayorista \
+		base porque PAR05 es una razon.
+	|
+
+Formacion e intercambio de semillas = Encuentros por semana*Asistentes por encuentro*\
+		Calidad del encuentro/Escala de formacion*(1-Conocimiento compartido)
+	~	Dmnl/Week
+	~	Flujo. Encuentros x asistentes x calidad, acotado por (1-STK07). Incluye \
+		registros devueltos a Bavaria D13.
+	|
+
+Formacion de promotores = MIN(Cupos mensuales de formacion/4.33,Capacidad de formadores\
+		)
+	~	persona/Week
+	~	Flujo. PAR11/4,3 limitado por formadores N-19.
+	|
+
+Llegada de solicitudes = Participantes activos*Solicitudes por participante
+	~	solicitud/Week
+	~	Flujo. Grafica G6 (tasa de llegada lambda).
+	|
+
+FLO01 Cierre de huertas = STK01 Huertas activas*Tasa de cierre
+	~	m2/Week
+	~	Flujo. Bucles B1 y B5.
+	|
+
+FLO02 Autoconsumo = Cosecha disponible*Autoconsumo/Tiempo de manejo
+	~	kg/Week
+	~	Flujo. Grafica G1.
+	|
+
+Excedente al acopio = MIN(Cosecha disponible*(1-Autoconsumo-Perdida en huerta)/Tiempo de manejo\
+		,Capacidad de acopio y reparto)
+	~	kg/Week
+	~	Flujo. Grafica G1. Limitado por STK04.
+	|
+
+Merma en huerta = Cosecha disponible*Perdida en huerta/Tiempo de manejo
+	~	kg/Week
+	~	Flujo. Grafica G1.
+	|
+
+Compras locales = MIN(MIN(Demanda local efectiva,Capacidad de acopio y reparto),0.75*\
+		Producto en acopio/TIME STEP)
+	~	kg/Week
+	~	Flujo. Tabla: MIN(EXO02, capacidad de reparto, STK03). Demanda corregida \
+		por precio relativo frente a Corabastos (B2).
+	|
+
+FLO06 Venta en feria = MIN(Asistentes a feria*kg por visita,0.15*Producto en acopio/TIME STEP\
+		)
+	~	kg/Week
+	~	Flujo. Asistentes x kg por visita, limitado por STK03.
+	|
+
+Merma en acopio = MIN(Producto en acopio*Perdida base en acopio*(1+3*Saturacion del acopio\
+		),0.1*Producto en acopio/TIME STEP)
+	~	kg/Week
+	~	Flujo. Sube cuando STK03 supera STK04. Bucle B4.
+	|
+
+Desgaste del equipamiento = Capacidad de acopio y reparto*Depreciacion de equipamiento
+	~	kg/Week/Week
+	~	Flujo. STK04 x depreciacion.
+	|
+
+Retiro de participantes = Participantes activos*Tasa de retiro h
+	~	persona/Week
+	~	Flujo. Grafica G7. Bucle B1.
+	|
+
+Perdida de conocimiento = Conocimiento compartido*(Olvido semanal+Perdida de saber por relevo\
+		)*(1-gamma Efecto de cultivos nativos*Area con cultivos nativos IPV1)
+	~	Dmnl/Week
+	~	Flujo. STK07 x (olvido + relevo PAR10) x (1 - gamma x AUX17).
+	|
+
+Retiro de promotores = Promotores activos*Tasa de retiro de promotores
+	~	persona/Week
+	~	Flujo. STK11 x tasa de retiro.
+	|
+
+Disponibilidad de suelo = Fraccion de suelo con acuerdo*(1-Revocacion por valorizacion\
+		)
+	~	Dmnl
+	~	Auxiliar. Parte del suelo candidato (K17, K18) con acuerdo de uso. Estres \
+		de valorizacion del suelo = REV.
+	|
+
+Dependencia de Corabastos en la zona = MAX(0,1-(Compras locales+FLO06 Venta en feria)\
+		/Demanda de la zona)
+	~	Dmnl
+	~	Auxiliar. Grafica G3. Variable que mide el problema P1. Demanda de la zona \
+		= poblacion x K05 x 7.
+	|
+
+Dependencia en Kennedy completa = MAX(0,1-Personas alimentadas/Poblacion Kennedy)
+	~	Dmnl
+	~	Auxiliar. Grafica G3. B 0,996 y C 0,991 en el area meta.
+	|
+
+Rotacion efectiva de vocerias = 3/Periodo de rotacion de vocerias
+	~	relevo/Quarter
+	~	Parametro o constante. Relevos por trimestre. Alivia la carga (B1).
+	|
+
+Carga por participante = ZIDZ(STK01 Huertas activas*Horas por m2 por semana,Participantes activos\
+		*Horas disponibles por semana*(1+Alivio por rotacion*Rotacion efectiva de vocerias)\
+		)
+	~	Dmnl
+	~	Auxiliar. Grafica G7. Horas requeridas / disponibles. Bucle B1.
+	|
+
+m2 por promotor = ZIDZ(STK01 Huertas activas,Promotores activos)
+	~	m2/persona
+	~	Auxiliar. Grafica G5. Bucle B5.
+	|
+
+AUX08 Calidad de manejo = MIN(1,XIDZ(Capacidad por promotor,m2 por promotor,1))
+	~	Dmnl
+	~	Auxiliar. Grafica G5. MIN(1, capacidad del promotor / AUX07).
+	|
+
+Tiempo medio de decision = XIDZ(Solicitudes pendientes,Solicitudes decididas,52)
+	~	Week
+	~	Auxiliar. Grafica G6. Ley de Little.
+	|
+
+Personas alimentadas = STK01 Huertas activas*PAR01 Rendimiento por area*(1-Perdida en huerta\
+		)/(Cuota de frutas y verduras*365)
+	~	persona
+	~	Auxiliar. Graficas G2, G3. B 4.377 y C 9.431 con r = 6 en el area meta.
+	|
+
+Alcance de Bavaria sobre cada tipologia = EXP(-d Distancia a Bavaria/d0 Escala de alcance\
+		)
+	~	Dmnl
+	~	Auxiliar. exp(-d/d0) con d por calles desde el nodo mas cercano.
+	|
+
+Area con cultivos nativos IPV1 = IF THEN ELSE(Escenario=1,0,IF THEN ELSE(Escenario=2,\
+		0.1,0.2))
+	~	Dmnl
+	~	Parametro o constante. Indicador patrimonial. B 0,10 y C 0,20 (S).
+	|
+
+Escenario = 2
+	~	Dmnl
+	~	Parametro o constante. Selector: 1 = A sin intervencion, 2 = B nodo unico \
+		y decision central, 3 = C cluster y decision rotativa.
+	|
+
+Alcance lotes = IF THEN ELSE(Escenario=1,0,IF THEN ELSE(Escenario=2,0.4,0.8))
+	~	Dmnl
+	~	Parametro o constante. Linea base: A 0, B 0,4, C 0,8 (S).
+	|
+
+Alcance techos = IF THEN ELSE(Escenario=1,0,IF THEN ELSE(Escenario=2,0.2,0.6))
+	~	Dmnl
+	~	Parametro o constante. Linea base: A 0, B 0,2, C 0,6 (S).
+	|
+
+Predio Bavaria incluido = IF THEN ELSE(Escenario=1,0,1)
+	~	Dmnl
+	~	Parametro o constante. No en A, si en B y C.
+	|
+
+Area meta = Predio Bavaria incluido*Predio Bavaria+Lotes baldios*Alcance lotes+Techos estrategia\
+		*Fraccion de techo utilizable*Alcance techos
+	~	m2
+	~	Auxiliar. Formula 1 de la linea base. A 0, B 125.309, C 269.998 m2.
+	|
+
+Techo de huerteros N = MIN(Area meta/m2 por huertero,Hogares Kennedy*Alcance de Bavaria sobre cada tipologia\
+		)
+	~	persona
+	~	Auxiliar. Grafica G4. B 2.506, C 5.400.
+	|
+
+Margen de crecimiento = IF THEN ELSE(Area meta>0,MAX(0,1-ZIDZ(STK01 Huertas activas,Area meta\
+		)),0)
+	~	Dmnl
+	~	Auxiliar. Frena la apertura al llegar al area meta del escenario.
+	|
+
+Efecto de participantes disponibles = MAX(0,MIN(1,2-ZIDZ(STK01 Huertas activas,Participantes activos\
+		*m2 por huertero)))
+	~	Dmnl
+	~	Auxiliar. R1/R3: solo se abre area si hay participantes que la cultiven \
+		(area por huertero K15).
+	|
+
+Efecto conocimiento sobre apertura = 0.5+Conocimiento compartido
+	~	Dmnl
+	~	Auxiliar. R2: mas conocimiento, mas aperturas.
+	|
+
+Efecto de cola de decision = 1/(1+Tiempo medio de decision/Espera tolerable de decision\
+		)
+	~	Dmnl
+	~	Auxiliar. Gobernanza P6: una cola larga frena aperturas.
+	|
+
+Tasa de cierre = Tasa base de cierre*(1+MAX(0,Carga por participante-1)+(1-AUX08 Calidad de manejo\
+		))
+	~	1/Week
+	~	Auxiliar. Sube con AUX05 y con AUX07 via AUX08.
+	|
+
+Saturacion del acopio = MAX(0,ZIDZ(Producto en acopio,Capacidad de acopio y reparto)-\
+		1)
+	~	Dmnl
+	~	Auxiliar. B4: STK03 por encima de STK04.
+	|
+
+Demanda local efectiva = Demanda de tiendas y comedores*Efecto de precio relativo
+	~	kg/Week
+	~	Auxiliar. Demanda de tiendas corregida por precio.
+	|
+
+Efecto de precio relativo = MAX(0,MIN(1,1-2*(Precio relativo local-1)))
+	~	Dmnl
+	~	Auxiliar. B2: si el precio local queda por encima del de Corabastos cae la \
+		compra local.
+	|
+
+Precio relativo local = Precio de excedentes*Precio mayorista base/Precio Corabastos
+	~	Dmnl
+	~	Auxiliar. Precio local / precio de Corabastos.
+	|
+
+Precio Corabastos = Precio mayorista base*(1-Baja de precio de la central)
+	~	COP/kg
+	~	Auxiliar.
+	|
+
+Baja de precio de la central = Reaccion de precio de Corabastos*(1-Dependencia percibida por la central\
+		)
+	~	Dmnl
+	~	Auxiliar. EXO05 x (1 - dependencia percibida).
+	|
+
+Dependencia percibida por la central = SMOOTHI(Dependencia de Corabastos en la zona,Retardo de reaccion de la central\
+		,1)
+	~	Dmnl
+	~	Auxiliar. Retardo del bucle B2 (evita lazo algebraico).
+	|
+
+Demanda de la zona = Poblacion de la zona de servicio*Cuota de frutas y verduras*7
+	~	kg/Week
+	~	Auxiliar. Poblacion de la zona x K05 x 7.
+	|
+
+Adopcion espontanea efectiva = Bass p*Alcance de Bavaria sobre cada tipologia*(1+Conocimiento compartido\
+		)
+	~	1/Week
+	~	Auxiliar. p de Bass ajustado por alcance de Bavaria y conocimiento.
+	|
+
+Perdida de saber por relevo = Fraccion de saber perdido por relevo/(Periodo de rotacion de vocerias\
+		*4.33)
+	~	1/Week
+	~	Auxiliar. Relevo de vocerias segun PAR10.
+	|
+
+Perdida de capacidad por relevo = 0.5*(1-Conocimiento compartido)
+	~	Dmnl
+	~	Auxiliar. Rotar reparte la carga pero pierde conocimiento.
+	|
+
+Capacidad de decision mu = IF THEN ELSE(Escenario=2,mu c Capacidad central,IF THEN ELSE\
+		(Escenario=3,Asambleas activas*mu a Capacidad por asamblea*(1-Perdida de capacidad por relevo\
+		),0))
+	~	solicitud/Week
+	~	Reportero de grafica. Grafica G6. Central mu c. Rotativo asambleas x mu a \
+		x (1 - perdida).
+	|
+
+Tasa de retiro h = MAX(0,h0 Retiro base*(1+beta Sensibilidad a la carga*(Carga por participante\
+		-1)))
+	~	1/Week
+	~	Reportero de grafica. Grafica G7.
+	|
+
+Porcentaje de Kennedy = Personas alimentadas/Poblacion Kennedy*100
+	~	Dmnl
+	~	Reportero de grafica. Grafica G2.
+	|
+
+Poblacion de zona para dependencia 50 pct = 2*Personas alimentadas
+	~	persona
+	~	Reportero de grafica. Grafica G3. Zona donde la dependencia cae al 50%.
+	|
+
+Dependencia segun personas alimentadas = MAX(0,1-Personas alimentadas/Poblacion de la zona de servicio\
+		)
+	~	Dmnl
+	~	Reportero de grafica. Grafica G3: formula AUX02 = max(0, 1 - AUX10 / \
+		poblacion de la zona).
+	|
+
+Promotores necesarios = ZIDZ(STK01 Huertas activas,Capacidad por promotor)
+	~	persona
+	~	Reportero de grafica. Grafica G5.
+	|
+
+Poblacion Kennedy = 1.03429e+06
+	~	persona
+	~	Parametro o constante. V. Observatorio, DANE.
+	|
+
+Hogares Kennedy = 375508
+	~	hogar
+	~	Parametro o constante. V. DANE 2023.
+	|
+
+Cuota de frutas y verduras = 0.4
+	~	kg/persona/Day
+	~	Parametro o constante. V OMS. 146 kg al anio.
+	|
+
+m2 por huertero = 50
+	~	m2/persona
+	~	Parametro o constante. S. Patios de 40 a 80 m2.
+	|
+
+Fraccion de techo utilizable = 0.1
+	~	Dmnl
+	~	Parametro o constante. S. Verificar con catastro.
+	|
+
+Techos estrategia = 2.98617e+06
+	~	m2
+	~	Parametro o constante. D simulador.
+	|
+
+Lotes baldios = 63108
+	~	m2
+	~	Parametro o constante. D. Otra cifra 33.691: conciliar.
+	|
+
+Predio Bavaria = 40342
+	~	m2
+	~	Parametro o constante. D simulador.
+	|
+
+PAR01 Rendimiento por area = 6
+	~	kg/m2/Year
+	~	Parametro o constante. Slider 1, 3, 6 o 12. Sin dato de Bogota.
+	|
+
+Autoconsumo = 0.25
+	~	Dmnl
+	~	Parametro o constante. S.
+	|
+
+Perdida en huerta = 0.15
+	~	Dmnl
+	~	Parametro o constante. S.
+	|
+
+Precio de excedentes = 1
+	~	Dmnl
+	~	Parametro o constante. Razon al mayorista, 0,8 a 1,2.
+	|
+
+Fraccion reinvertida = 0.1
+	~	Dmnl
+	~	Parametro o constante. Por estimar.
+	|
+
+Retardo de aprendizaje = 6
+	~	Month
+	~	Parametro o constante. Por estimar.
+	|
+
+Periodo de rotacion de vocerias = 6
+	~	Month
+	~	Parametro o constante. Por definir con la Mesa.
+	|
+
+Cupos mensuales de formacion = 4
+	~	persona/Month
+	~	Parametro o constante. Por definir.
+	|
+
+Perdida base en acopio = 0.05
+	~	1/Week
+	~	Parametro o constante. Por definir.
+	|
+
+Clima = 1
+	~	Dmnl
+	~	Parametro o constante. Normal 1, lluvia 0,8, sequia 0,55 (S). Estres de \
+		sequia.
+	|
+
+Demanda de tiendas y comedores = 15000
+	~	kg/Week
+	~	Parametro o constante. S. El simulador usa 150 tiendas.
+	|
+
+Presupuesto publico = 2e+07
+	~	COP/Year
+	~	Parametro o constante. Por estimar. Presupuestos participativos A34.
+	|
+
+Reaccion de precio de Corabastos = 0.15
+	~	Dmnl
+	~	Parametro o constante. 0 a 0,30 (S). Elasticidad del simulador 0,35.
+	|
+
+Poblacion de la zona de servicio = 20000
+	~	persona
+	~	Parametro o constante. Slider. Zona de ejemplo 20.000 personas (SDP por \
+		completar).
+	|
+
+Fraccion de suelo con acuerdo = 0.6
+	~	Dmnl
+	~	Parametro o constante. S.
+	|
+
+Revocacion por valorizacion = 0
+	~	Dmnl
+	~	Parametro o constante. Estres: revocacion de baldios (antes SIM6).
+	|
+
+m2 abiertos por promotor = 20
+	~	m2/Week/persona
+	~	Parametro o constante. S.
+	|
+
+Capacidad por promotor = 1000
+	~	m2/persona
+	~	Parametro o constante. S. 20 huertas de 50 m2.
+	|
+
+Capacidad de formadores = 1
+	~	persona/Week
+	~	Parametro o constante. S.
+	|
+
+Tasa de retiro de promotores = 0.002
+	~	1/Week
+	~	Parametro o constante. S.
+	|
+
+Tasa base de cierre = 0.002
+	~	1/Week
+	~	Parametro o constante. S.
+	|
+
+Tiempo de manejo = 1
+	~	Week
+	~	Parametro o constante.
+	|
+
+Asistentes a feria = 200
+	~	persona/Week
+	~	Parametro o constante. S.
+	|
+
+kg por visita = 2
+	~	kg/persona
+	~	Parametro o constante. S.
+	|
+
+Precio mayorista base = 2500
+	~	COP/kg
+	~	Parametro o constante. S.
+	|
+
+Fraccion de reinversion a capacidad = 0.5
+	~	Dmnl
+	~	Parametro o constante. S.
+	|
+
+Fraccion de presupuesto a acopio = 0.1
+	~	Dmnl
+	~	Parametro o constante. S.
+	|
+
+Costo por kg semana de capacidad = 50000
+	~	COP*Week/kg
+	~	Parametro o constante. S.
+	|
+
+Depreciacion de equipamiento = 0.001
+	~	1/Week
+	~	Parametro o constante. S.
+	|
+
+Bass p = 0.00058
+	~	1/Week
+	~	Parametro o constante. Literatura Bass: 0,03 por anio. Por calibrar.
+	|
+
+Bass q = 0.0073
+	~	1/Week
+	~	Parametro o constante. Literatura Bass: 0,38 por anio. Por calibrar.
+	|
+
+Horas por m2 por semana = 0.1
+	~	hora/m2/Week
+	~	Parametro o constante. S.
+	|
+
+Horas disponibles por semana = 6
+	~	hora/persona/Week
+	~	Parametro o constante. S.
+	|
+
+h0 Retiro base = 0.005
+	~	1/Week
+	~	Parametro o constante. S.
+	|
+
+beta Sensibilidad a la carga = 1
+	~	Dmnl
+	~	Parametro o constante. S.
+	|
+
+Alivio por rotacion = 0.1
+	~	Dmnl
+	~	Parametro o constante. S.
+	|
+
+Encuentros por semana = 1
+	~	1/Week
+	~	Parametro o constante. S.
+	|
+
+Asistentes por encuentro = 20
+	~	persona
+	~	Parametro o constante. S.
+	|
+
+Calidad del encuentro = 0.8
+	~	Dmnl
+	~	Parametro o constante. S.
+	|
+
+Escala de formacion = 1000
+	~	Dmnl
+	~	Parametro o constante. S.
+	|
+
+Olvido semanal = 0.003
+	~	1/Week
+	~	Parametro o constante. S.
+	|
+
+Fraccion de saber perdido por relevo = 0.15
+	~	Dmnl
+	~	Parametro o constante. S.
+	|
+
+gamma Efecto de cultivos nativos = 0.5
+	~	Dmnl
+	~	Parametro o constante. S.
+	|
+
+Solicitudes por participante = 0.05
+	~	1/Week
+	~	Parametro o constante. S.
+	|
+
+mu c Capacidad central = 100
+	~	solicitud/Week
+	~	Parametro o constante. Por estimar con la Mesa.
+	|
+
+Asambleas activas = 5
+	~	Dmnl
+	~	Parametro o constante. S.
+	|
+
+mu a Capacidad por asamblea = 40
+	~	solicitud/Week
+	~	Parametro o constante. Por estimar con la Mesa.
+	|
+
+Espera tolerable de decision = 8
+	~	Week
+	~	Parametro o constante. S.
+	|
+
+Efecto de la norma de ronda = 1
+	~	Dmnl
+	~	Parametro o constante. Solo para E04. Ver EXO04 en S3.
+	|
+
+Retardo de reaccion de la central = 8
+	~	Week
+	~	Parametro o constante. S.
+	|
+
+d Distancia a Bavaria = 400
+	~	m
+	~	Parametro o constante. S. Por calles.
+	|
+
+d0 Escala de alcance = 1000
+	~	m
+	~	Parametro o constante. Por calibrar.
+	|
+
+********************************************************
+	.Control
+********************************************************~
+		Simulation Control Parameters
+	|
+
+FINAL TIME  = 520
+	~	Week
+	~	The final time for the simulation.
+	|
+
+INITIAL TIME  = 0
+	~	Week
+	~	The initial time for the simulation.
+	|
+
+SAVEPER  = 
+        TIME STEP
+	~	Week [0,?]
+	~	The frequency with which output is stored.
+	|
+
+TIME STEP  = 0.25
+	~	Week [0,?]
+	~	The time step for the simulation.
+	|
+
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*S1 Red de huertas, abastecimiento y decision
+$192-192-192,0,Times New Roman|10||0-0-0|0-0-0|0-0-255|-1--1--1|-1--1--1|96,96,106,0
+10,1,STK01 Huertas activas,1000,-104,75,14,3,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,2,Cosecha disponible,440,226,84,14,3,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,3,Producto en acopio,1000,226,84,14,3,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,4,Capacidad de acopio y reparto,1640,226,120,14,3,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,5,Participantes activos,444,558,50,18,3,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,6,Ingreso acumulado,1147,591,45,20,3,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,7,Conocimiento compartido,1758,676,100,14,3,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,8,Promotores activos,440,-104,84,14,3,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,9,Solicitudes pendientes,438,885,54,21,3,3,0,0,0,0,0,0,0,0,0,0,0,0
+11,10,0,850,-104,6,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,11,FLI01 Apertura de huertas,850,-82,88,8,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+11,12,0,290,226,6,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,13,Produccion,290,248,59,8,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+11,14,0,1458,232,6,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,15,Ampliacion de acopio,1458,266,59,26,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+11,16,0,302,553,6,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,17,Incorporacion de participantes,302,581,66,20,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+11,18,0,996,594,6,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,19,Ingreso por ventas,996,617,43,15,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+11,20,0,1592,677,6,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,21,Formacion e intercambio de semillas,1592,707,62,22,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+11,22,0,290,-104,6,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,23,Formacion de promotores,290,-82,100,8,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+11,24,0,287,889,6,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,25,Llegada de solicitudes,287,917,47,20,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+11,26,0,1150,-104,6,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,27,FLO01 Cierre de huertas,1150,-82,81,8,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+11,28,0,500,128,6,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,29,FLO02 Autoconsumo,500,144,62,8,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+11,30,0,739,226,6,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,31,Excedente al acopio,739,255,44,21,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+11,32,0,482,293,6,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,33,Merma en huerta,482,309,75,8,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+11,34,0,1150,226,6,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,35,Compras locales,1150,248,75,8,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+11,36,0,1023,143,6,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,37,FLO06 Venta en feria,1023,159,72,8,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+11,38,0,1008,324,6,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,39,Merma en acopio,1008,352,38,20,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+11,40,0,1809,237,6,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,41,Desgaste del equipamiento,1809,262,57,17,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+11,42,0,590,556,6,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,43,Retiro de participantes,590,578,100,8,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+11,44,0,1916,680,6,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,45,Perdida de conocimiento,1916,710,57,22,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+11,46,0,590,-104,6,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,47,Retiro de promotores,590,-82,91,8,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+11,48,0,581,892,6,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,49,Solicitudes decididas,581,917,47,17,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+12,50,48,760,-104,10,8,0,3,0,0,0,0,0,0,0,0,0,0,0,0
+12,51,48,200,226,10,8,0,3,0,0,0,0,0,0,0,0,0,0,0,0
+12,52,48,1400,226,10,8,0,3,0,0,0,0,0,0,0,0,0,0,0,0
+12,53,48,200,556,10,8,0,3,0,0,0,0,0,0,0,0,0,0,0,0
+12,54,48,891,593,10,8,0,3,0,0,0,0,0,0,0,0,0,0,0,0
+12,55,48,1458,677,10,8,0,3,0,0,0,0,0,0,0,0,0,0,0,0
+12,56,48,200,-104,10,8,0,3,0,0,0,0,0,0,0,0,0,0,0,0
+12,57,48,200,886,10,8,0,3,0,0,0,0,0,0,0,0,0,0,0,0
+12,58,48,1240,-104,10,8,0,3,0,0,0,0,0,0,0,0,0,0,0,0
+12,59,48,500,52,10,8,0,3,0,0,0,0,0,0,0,0,0,0,0,0
+12,60,48,545,365,10,8,0,3,0,0,0,0,0,0,0,0,0,0,0,0
+12,61,48,1240,226,10,8,0,3,0,0,0,0,0,0,0,0,0,0,0,0
+12,62,48,1023,47,10,8,0,3,0,0,0,0,0,0,0,0,0,0,0,0
+12,63,48,950,324,10,8,0,3,0,0,0,0,0,0,0,0,0,0,0,0
+12,64,48,1880,237,10,8,0,3,0,0,0,0,0,0,0,0,0,0,0,0
+12,65,48,680,556,10,8,0,3,0,0,0,0,0,0,0,0,0,0,0,0
+12,66,48,1998,680,10,8,0,3,0,0,0,0,0,0,0,0,0,0,0,0
+12,67,48,680,-104,10,8,0,3,0,0,0,0,0,0,0,0,0,0,0,0
+12,68,48,680,892,10,8,0,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,69,Disponibilidad de suelo,752,-234,42,27,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,70,Dependencia de Corabastos en la zona,1218,-6,60,26,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,71,Dependencia en Kennedy completa,376,-506,59,14,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,72,Rotacion efectiva de vocerias,665,797,46,17,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,73,Carga por participante,288,357,43,20,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,74,m2 por promotor,484,-240,75,8,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,75,AUX08 Calidad de manejo,118,100,81,8,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,76,Tiempo medio de decision,440,805,44,16,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,77,Personas alimentadas,656,-353,91,8,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,78,Alcance de Bavaria sobre cada tipologia,574,1461,61,23,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,79,Area con cultivos nativos IPV1,1439,1269,52,25,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,80,Escenario,782,1290,36,8,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,81,Alcance lotes,842,1173,49,8,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,82,Alcance techos,887,1196,52,8,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,83,Predio Bavaria incluido,995,1117,45,19,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,84,Area meta,770,712,36,8,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,85,Techo de huerteros N,103,1052,72,8,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,86,Margen de crecimiento,906,433,75,8,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,87,Efecto de participantes disponibles,743,437,49,19,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,88,Efecto conocimiento sobre apertura,1442,-116,54,27,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,89,Efecto de cola de decision,442,729,39,28,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,90,Tasa de cierre,-107,165,52,8,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,91,Saturacion del acopio,1299,269,41,20,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,92,Demanda local efectiva,1761,55,78,8,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,93,Efecto de precio relativo,1946,46,88,8,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,94,Precio relativo local,1493,474,42,19,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,95,Precio Corabastos,1263,392,62,8,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,96,Baja de precio de la central,1319,340,41,26,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,97,Dependencia percibida por la central,1396,37,59,29,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,98,Demanda de la zona,1011,-381,65,8,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,99,Adopcion espontanea efectiva,1119,1239,97,8,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,100,Perdida de saber por relevo,1465,825,46,19,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,101,Perdida de capacidad por relevo,1612,1074,61,35,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,102,Capacidad de decision mu,679,1042,35,17,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,103,Tasa de retiro h,478,400,68,8,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,104,Porcentaje de Kennedy,600,-451,48,16,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,105,Poblacion de zona para dependencia 50 pct,389,-358,76,23,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,106,Dependencia segun personas alimentadas,764,-540,60,26,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,107,Promotores necesarios,1151,-348,60,26,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,108,Poblacion Kennedy,505,-547,47,13,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,109,Hogares Kennedy,293,1083,31,23,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,110,Cuota de frutas y verduras,767,-475,61,34,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,111,m2 por huertero,1111,929,68,8,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,112,Fraccion de techo utilizable,956,775,39,19,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,113,Techos estrategia,938,708,41,18,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,114,Lotes baldios,912,655,23,14,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,115,Predio Bavaria,827,604,33,20,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,116,PAR01 Rendimiento por area,363,115,91,8,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,117,Autoconsumo,699,178,42,11,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,118,Perdida en huerta,643,19,48,14,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,119,Precio de excedentes,1424,555,45,17,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,120,Fraccion reinvertida,1225,723,91,8,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,121,Retardo de aprendizaje,224,455,69,17,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,122,Periodo de rotacion de vocerias,1267,827,55,49,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,123,Cupos mensuales de formacion,283,-27,62,23,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,124,Perdida base en acopio,1020,431,38,21,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,125,Clima,128,183,25,10,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,126,Demanda de tiendas y comedores,1641,-60,53,30,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,127,Presupuesto publico,1808,173,47,23,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,128,Reaccion de precio de Corabastos,1499,346,50,26,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,129,Poblacion de la zona de servicio,1046,-498,49,27,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,130,Fraccion de suelo con acuerdo,870,-230,37,16,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,131,Revocacion por valorizacion,751,-306,45,14,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,132,m2 abiertos por promotor,910,-169,40,24,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,133,Capacidad por promotor,663,-617,78,8,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,134,Capacidad de formadores,273,-193,55,19,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,135,Tasa de retiro de promotores,502,-22,47,18,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,136,Tasa base de cierre,-283,147,68,8,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,137,Tiempo de manejo,617,316,33,14,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,138,Asistentes a feria,1140,60,36,19,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,139,kg por visita,1155,118,24,16,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,140,Precio mayorista base,1249,543,48,13,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,141,Fraccion de reinversion a capacidad,1430,157,60,27,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,142,Fraccion de presupuesto a acopio,1370,200,54,17,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,143,Costo por kg semana de capacidad,1643,142,62,28,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,144,Depreciacion de equipamiento,1782,338,50,21,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,145,Bass p,1244,1266,27,8,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,146,Bass q,136,499,27,8,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,147,Horas por m2 por semana,138,379,41,19,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,148,Horas disponibles por semana,49,228,46,18,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,149,h0 Retiro base,416,325,52,8,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,150,beta Sensibilidad a la carga,458,473,45,22,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,151,Alivio por rotacion,4,292,37,12,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,152,Encuentros por semana,1582,595,46,14,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,153,Asistentes por encuentro,1689,609,48,15,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,154,Calidad del encuentro,1547,814,43,20,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,155,Escala de formacion,1503,635,68,8,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,156,Olvido semanal,2078,612,52,8,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,157,Fraccion de saber perdido por relevo,1351,970,53,27,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,158,gamma Efecto de cultivos nativos,2092,755,51,16,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,159,Solicitudes por participante,221,981,43,34,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,160,mu c Capacidad central,783,1141,46,23,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,161,Asambleas activas,553,1160,62,8,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,162,mu a Capacidad por asamblea,698,1243,41,21,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,163,Espera tolerable de decision,345,784,51,25,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,164,Efecto de la norma de ronda,820,-181,43,23,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,165,Retardo de reaccion de la central,1479,-44,56,19,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,166,d Distancia a Bavaria,469,1543,35,28,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,167,d0 Escala de alcance,766,1428,46,34,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+1,168,10,1,4,0,0,22,0,0,0,-1--1--1,,1|(890,-104)|
+1,169,50,10,100,0,0,22,0,0,0,-1--1--1,,1|(807,-104)|
+1,170,12,2,4,0,0,22,0,0,0,-1--1--1,,1|(326,226)|
+1,171,51,12,100,0,0,22,0,0,0,-1--1--1,,1|(247,226)|
+1,172,14,4,4,0,0,22,0,0,0,-1--1--1,,1|(1492,232)|
+1,173,52,14,100,0,0,22,0,0,0,-1--1--1,,1|(1431,232)|
+1,174,16,5,4,0,0,22,0,0,0,-1--1--1,,1|(351,553)|
+1,175,53,16,100,0,0,22,0,0,0,-1--1--1,,1|(253,553)|
+1,176,18,6,4,0,0,22,0,0,0,-1--1--1,,1|(1052,594)|
+1,177,54,18,100,0,0,22,0,0,0,-1--1--1,,1|(945,594)|
+1,178,20,7,4,0,0,22,0,0,0,-1--1--1,,1|(1628,677)|
+1,179,55,20,100,0,0,22,0,0,0,-1--1--1,,1|(1527,677)|
+1,180,22,8,4,0,0,22,0,0,0,-1--1--1,,1|(326,-104)|
+1,181,56,22,100,0,0,22,0,0,0,-1--1--1,,1|(247,-104)|
+1,182,24,9,4,0,0,22,0,0,0,-1--1--1,,1|(338,889)|
+1,183,57,24,100,0,0,22,0,0,0,-1--1--1,,1|(245,889)|
+1,184,26,58,4,0,0,22,0,0,0,-1--1--1,,1|(1193,-104)|
+1,185,1,26,100,0,0,22,0,0,0,-1--1--1,,1|(1109,-104)|
+1,186,28,59,4,0,0,22,0,0,0,-1--1--1,,1|(500,90)|
+1,187,2,28,100,0,0,22,0,0,0,-1--1--1,,1|(500,174)|
+1,188,30,3,4,0,0,22,0,0,0,-1--1--1,,1|(830,226)|
+1,189,2,30,100,0,0,22,0,0,0,-1--1--1,,1|(628,226)|
+1,190,32,60,4,0,0,22,0,0,0,-1--1--1,,1|(545,293)|
+1,191,2,32,100,0,0,22,0,0,0,-1--1--1,,1|(482,263)|
+1,192,34,61,4,0,0,22,0,0,0,-1--1--1,,1|(1193,226)|
+1,193,3,34,100,0,0,22,0,0,0,-1--1--1,,1|(1114,226)|
+1,194,36,62,4,0,0,22,0,0,0,-1--1--1,,1|(1023,95)|
+1,195,3,36,100,0,0,22,0,0,0,-1--1--1,,1|(1023,182)|
+1,196,38,63,4,0,0,22,0,0,0,-1--1--1,,1|(981,324)|
+1,197,3,38,100,0,0,22,0,0,0,-1--1--1,,1|(1008,278)|
+1,198,40,64,4,0,0,22,0,0,0,-1--1--1,,1|(1842,237)|
+1,199,4,40,100,0,0,22,0,0,0,-1--1--1,,1|(1781,237)|
+1,200,42,65,4,0,0,22,0,0,0,-1--1--1,,1|(633,556)|
+1,201,5,42,100,0,0,22,0,0,0,-1--1--1,,1|(539,556)|
+1,202,44,66,4,0,0,22,0,0,0,-1--1--1,,1|(1955,680)|
+1,203,7,44,100,0,0,22,0,0,0,-1--1--1,,1|(1884,680)|
+1,204,46,67,4,0,0,22,0,0,0,-1--1--1,,1|(633,-104)|
+1,205,8,46,100,0,0,22,0,0,0,-1--1--1,,1|(554,-104)|
+1,206,48,68,4,0,0,22,0,0,0,-1--1--1,,1|(628,892)|
+1,207,9,48,100,0,0,22,0,0,0,-1--1--1,,1|(533,892)|
+1,208,69,10,1,0,43,0,0,192,0,-1--1--1,,1|(780,-150)|
+1,209,75,10,1,0,43,0,0,192,0,-1--1--1,,1|(518,35)|
+1,210,89,10,1,0,43,0,0,192,0,-1--1--1,,1|(595,244)|
+1,211,88,10,1,0,43,0,0,192,0,-1--1--1,,1|(1115,-181)|
+1,212,164,10,1,0,43,0,0,192,0,-1--1--1,,1|(822,-137)|
+1,213,87,10,1,0,43,0,0,192,0,-1--1--1,,1|(778,166)|
+1,214,86,10,1,0,43,0,0,192,0,-1--1--1,,1|(837,199)|
+1,215,132,10,1,0,43,0,0,192,0,-1--1--1,,1|(893,-134)|
+1,216,8,10,1,0,43,0,0,192,0,-1--1--1,,1|(668,-162)|
+1,217,75,12,1,0,43,0,0,192,0,-1--1--1,,1|(225,140)|
+1,218,125,12,1,0,43,0,0,192,0,-1--1--1,,1|(222,190)|
+1,219,116,12,1,0,43,0,0,192,0,-1--1--1,,1|(348,163)|
+1,220,1,12,1,0,43,0,0,192,0,-1--1--1,,1|(655,112)|
+1,221,143,14,1,0,45,0,0,192,0,-1--1--1,,1|(1530,155)|
+1,222,127,14,1,0,43,0,0,192,0,-1--1--1,,1|(1623,99)|
+1,223,142,14,1,0,43,0,0,192,0,-1--1--1,,1|(1411,245)|
+1,224,141,14,1,0,43,0,0,192,0,-1--1--1,,1|(1436,202)|
+1,225,99,16,1,0,43,0,0,192,0,-1--1--1,,1|(40,1262)|
+1,226,146,16,1,0,43,0,0,192,0,-1--1--1,,1|(229,502)|
+1,227,85,16,1,0,43,0,0,192,0,-1--1--1,,1|(120,774)|
+1,228,121,16,1,0,45,0,0,192,0,-1--1--1,,1|(288,482)|
+1,229,34,18,1,0,43,0,0,192,0,-1--1--1,,1|(1132,407)|
+1,230,36,18,1,0,43,0,0,192,0,-1--1--1,,1|(956,332)|
+1,231,119,18,1,0,43,0,0,192,0,-1--1--1,,1|(1224,694)|
+1,232,140,18,1,0,43,0,0,192,0,-1--1--1,,1|(1114,533)|
+1,233,153,20,1,0,43,0,0,192,0,-1--1--1,,1|(1654,651)|
+1,234,154,20,1,0,43,0,0,192,0,-1--1--1,,1|(1528,739)|
+1,235,152,20,1,0,43,0,0,192,0,-1--1--1,,1|(1603,634)|
+1,236,155,20,1,0,45,0,0,192,0,-1--1--1,,1|(1530,659)|
+1,237,7,20,0,0,45,0,0,192,0,-1--1--1,,1|(0,0)|
+1,238,134,22,1,0,43,0,0,192,0,-1--1--1,,1|(316,-158)|
+1,239,123,22,1,0,43,0,0,192,0,-1--1--1,,1|(305,-75)|
+1,240,159,24,1,0,43,0,0,192,0,-1--1--1,,1|(236,920)|
+1,241,5,24,1,0,43,0,0,192,0,-1--1--1,,1|(311,697)|
+1,242,90,26,1,0,43,0,0,192,0,-1--1--1,,1|(359,-309)|
+1,243,117,28,1,0,43,0,0,192,0,-1--1--1,,1|(594,117)|
+1,244,137,28,1,0,45,0,0,192,0,-1--1--1,,1|(609,213)|
+1,245,117,30,1,0,45,0,0,192,0,-1--1--1,,1|(707,206)|
+1,246,118,30,1,0,45,0,0,192,0,-1--1--1,,1|(734,109)|
+1,247,4,30,1,0,43,0,0,192,0,-1--1--1,,1|(1144,417)|
+1,248,137,30,1,0,45,0,0,192,0,-1--1--1,,1|(699,307)|
+1,249,118,32,1,0,43,0,0,192,0,-1--1--1,,1|(603,164)|
+1,250,137,32,1,0,45,0,0,192,0,-1--1--1,,1|(543,275)|
+1,251,92,34,1,0,43,0,0,192,0,-1--1--1,,1|(1411,79)|
+1,252,4,34,1,0,43,0,0,192,0,-1--1--1,,1|(1345,160)|
+1,253,138,36,1,0,43,0,0,192,0,-1--1--1,,1|(1086,121)|
+1,254,139,36,1,0,43,0,0,192,0,-1--1--1,,1|(1099,147)|
+1,255,124,38,1,0,43,0,0,192,0,-1--1--1,,1|(973,370)|
+1,256,91,38,1,0,43,0,0,192,0,-1--1--1,,1|(1159,346)|
+1,257,144,40,1,0,43,0,0,192,0,-1--1--1,,1|(1820,299)|
+1,258,103,42,1,0,43,0,0,192,0,-1--1--1,,1|(552,460)|
+1,259,79,44,1,0,45,0,0,192,0,-1--1--1,,1|(1777,1064)|
+1,260,158,44,1,0,45,0,0,192,0,-1--1--1,,1|(1983,742)|
+1,261,156,44,1,0,43,0,0,192,0,-1--1--1,,1|(1954,601)|
+1,262,100,44,1,0,43,0,0,192,0,-1--1--1,,1|(1710,807)|
+1,263,7,44,0,0,43,0,0,192,0,-1--1--1,,1|(0,0)|
+1,264,135,46,1,0,43,0,0,192,0,-1--1--1,,1|(578,-46)|
+1,265,102,48,1,0,43,0,0,192,0,-1--1--1,,1|(678,967)|
+1,266,130,69,1,0,43,0,0,192,0,-1--1--1,,1|(822,-219)|
+1,267,131,69,1,0,45,0,0,192,0,-1--1--1,,1|(737,-281)|
+1,268,98,70,1,0,43,0,0,192,0,-1--1--1,,1|(1227,-332)|
+1,269,34,70,1,0,45,0,0,192,0,-1--1--1,,1|(1228,137)|
+1,270,36,70,1,0,45,0,0,192,0,-1--1--1,,1|(1086,52)|
+1,271,77,71,1,0,45,0,0,192,0,-1--1--1,,1|(560,-441)|
+1,272,108,71,0,0,43,0,0,192,0,-1--1--1,,1|(0,0)|
+1,273,122,72,1,0,45,0,0,192,0,-1--1--1,,1|(968,888)|
+1,274,151,73,1,0,45,0,0,192,0,-1--1--1,,1|(115,350)|
+1,275,72,73,1,0,45,0,0,192,0,-1--1--1,,1|(394,622)|
+1,276,148,73,1,0,45,0,0,192,0,-1--1--1,,1|(164,276)|
+1,277,147,73,1,0,43,0,0,192,0,-1--1--1,,1|(230,389)|
+1,278,1,73,1,0,43,0,0,192,0,-1--1--1,,1|(677,206)|
+1,279,5,73,1,0,45,0,0,192,0,-1--1--1,,1|(363,483)|
+1,280,1,74,1,0,43,0,0,192,0,-1--1--1,,1|(811,-312)|
+1,281,8,74,1,0,45,0,0,192,0,-1--1--1,,1|(433,-187)|
+1,282,74,75,1,0,45,0,0,192,0,-1--1--1,,1|(169,-152)|
+1,283,133,75,1,0,43,0,0,192,0,-1--1--1,,1|(88,-208)|
+1,284,48,76,1,0,45,0,0,192,0,-1--1--1,,1|(549,833)|
+1,285,9,76,1,0,43,0,0,192,0,-1--1--1,,1|(420,848)|
+1,286,110,77,1,0,45,0,0,192,0,-1--1--1,,1|(693,-432)|
+1,287,116,77,1,0,43,0,0,192,0,-1--1--1,,1|(181,-164)|
+1,288,118,77,1,0,45,0,0,192,0,-1--1--1,,1|(702,-127)|
+1,289,1,77,1,0,43,0,0,192,0,-1--1--1,,1|(928,-287)|
+1,290,167,78,1,0,43,0,0,192,0,-1--1--1,,1|(670,1417)|
+1,291,166,78,1,0,45,0,0,192,0,-1--1--1,,1|(536,1524)|
+1,292,80,79,1,0,43,0,0,192,0,-1--1--1,,1|(1081,1356)|
+1,293,80,81,1,0,43,0,0,192,0,-1--1--1,,1|(797,1233)|
+1,294,80,82,1,0,43,0,0,192,0,-1--1--1,,1|(843,1258)|
+1,295,80,83,1,0,43,0,0,192,0,-1--1--1,,1|(913,1241)|
+1,296,81,84,1,0,43,0,0,192,0,-1--1--1,,1|(856,938)|
+1,297,82,84,1,0,43,0,0,192,0,-1--1--1,,1|(868,955)|
+1,298,83,84,1,0,43,0,0,192,0,-1--1--1,,1|(932,921)|
+1,299,112,84,1,0,43,0,0,192,0,-1--1--1,,1|(853,775)|
+1,300,113,84,1,0,43,0,0,192,0,-1--1--1,,1|(857,727)|
+1,301,114,84,1,0,43,0,0,192,0,-1--1--1,,1|(844,688)|
+1,302,115,84,1,0,43,0,0,192,0,-1--1--1,,1|(820,668)|
+1,303,84,85,1,0,43,0,0,192,0,-1--1--1,,1|(349,711)|
+1,304,78,85,1,0,43,0,0,192,0,-1--1--1,,1|(286,1313)|
+1,305,109,85,1,0,43,0,0,192,0,-1--1--1,,1|(190,1092)|
+1,306,111,85,1,0,45,0,0,192,0,-1--1--1,,1|(800,1337)|
+1,307,84,86,1,0,43,0,0,192,0,-1--1--1,,1|(803,548)|
+1,308,1,86,1,0,45,0,0,192,0,-1--1--1,,1|(898,173)|
+1,309,111,87,1,0,43,0,0,192,0,-1--1--1,,1|(1014,685)|
+1,310,1,87,1,0,45,0,0,192,0,-1--1--1,,1|(849,136)|
+1,311,5,87,1,0,43,0,0,192,0,-1--1--1,,1|(583,521)|
+1,312,7,88,1,0,43,0,0,192,0,-1--1--1,,1|(2137,208)|
+1,313,76,89,1,0,45,0,0,192,0,-1--1--1,,1|(471,757)|
+1,314,163,89,1,0,43,0,0,192,0,-1--1--1,,1|(374,737)|
+1,315,73,90,1,0,43,0,0,192,0,-1--1--1,,1|(108,229)|
+1,316,75,90,1,0,45,0,0,192,0,-1--1--1,,1|(-7,101)|
+1,317,136,90,1,0,43,0,0,192,0,-1--1--1,,1|(-208,187)|
+1,318,3,91,1,0,43,0,0,192,0,-1--1--1,,1|(1132,292)|
+1,319,4,91,1,0,45,0,0,192,0,-1--1--1,,1|(1474,287)|
+1,320,93,92,1,0,43,0,0,192,0,-1--1--1,,1|(1851,22)|
+1,321,126,92,1,0,43,0,0,192,0,-1--1--1,,1|(1688,22)|
+1,322,94,93,1,0,45,0,0,192,0,-1--1--1,,1|(1988,214)|
+1,323,119,94,1,0,43,0,0,192,0,-1--1--1,,1|(1435,507)|
+1,324,95,94,1,0,45,0,0,192,0,-1--1--1,,1|(1372,392)|
+1,325,140,94,1,0,43,0,0,192,0,-1--1--1,,1|(1369,479)|
+1,326,96,95,0,0,45,0,0,192,0,-1--1--1,,1|(0,0)|
+1,327,140,95,1,0,43,0,0,192,0,-1--1--1,,1|(1216,462)|
+1,328,97,96,1,0,45,0,0,192,0,-1--1--1,,1|(1300,159)|
+1,329,128,96,0,0,43,0,0,192,0,-1--1--1,,1|(0,0)|
+1,330,70,97,1,0,43,0,0,192,0,-1--1--1,,1|(1318,-21)|
+1,331,165,97,1,0,45,0,0,192,0,-1--1--1,,1|(1469,1)|
+1,332,110,98,1,0,43,0,0,192,0,-1--1--1,,1|(917,-482)|
+1,333,129,98,1,0,43,0,0,192,0,-1--1--1,,1|(1074,-440)|
+1,334,78,99,1,0,43,0,0,192,0,-1--1--1,,1|(946,1443)|
+1,335,145,99,1,0,43,0,0,192,0,-1--1--1,,1|(1173,1282)|
+1,336,7,99,1,0,43,0,0,192,0,-1--1--1,,1|(1518,1052)|
+1,337,157,100,1,0,43,0,0,192,0,-1--1--1,,1|(1450,916)|
+1,338,122,100,1,0,45,0,0,192,0,-1--1--1,,1|(1361,869)|
+1,339,7,101,1,0,45,0,0,192,0,-1--1--1,,1|(1753,889)|
+1,340,161,102,1,0,43,0,0,192,0,-1--1--1,,1|(569,1104)|
+1,341,80,102,1,0,43,0,0,192,0,-1--1--1,,1|(717,1182)|
+1,342,162,102,1,0,43,0,0,192,0,-1--1--1,,1|(665,1163)|
+1,343,160,102,1,0,43,0,0,192,0,-1--1--1,,1|(755,1089)|
+1,344,101,102,1,0,45,0,0,192,0,-1--1--1,,1|(1126,975)|
+1,345,73,103,0,0,43,0,0,192,0,-1--1--1,,1|(0,0)|
+1,346,150,103,1,0,43,0,0,192,0,-1--1--1,,1|(452,434)|
+1,347,149,103,1,0,43,0,0,192,0,-1--1--1,,1|(464,355)|
+1,348,77,104,1,0,43,0,0,192,0,-1--1--1,,1|(650,-407)|
+1,349,108,104,0,0,45,0,0,192,0,-1--1--1,,1|(0,0)|
+1,350,77,105,1,0,43,0,0,192,0,-1--1--1,,1|(514,-385)|
+1,351,77,106,1,0,45,0,0,192,0,-1--1--1,,1|(681,-441)|
+1,352,129,106,1,0,43,0,0,192,0,-1--1--1,,1|(929,-563)|
+1,353,133,107,1,0,45,0,0,192,0,-1--1--1,,1|(1004,-603)|
+1,354,1,107,1,0,43,0,0,192,0,-1--1--1,,1|(1141,-201)|
+1,355,84,1,1,0,0,0,0,64,0,-1--1--1,,1|(797,316)|
+1,356,35,3,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+1,357,84,5,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+1,358,111,5,1,0,0,0,0,64,0,-1--1--1,,1|(699,871)|
+10,359,TIME STEP,1150,278,31,22,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,360,359,35,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+10,361,TIME STEP,1110,188,31,22,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,362,361,37,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+10,363,TIME STEP,1060,273,31,22,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,364,363,39,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+10,365,TIME STEP,606,983,31,22,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,366,365,49,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+12,367,48,1359,593,10,8,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,368,370,6,100,0,0,22,0,192,0,-1--1--1,,1|(1233,593)|
+1,369,370,367,4,0,0,22,0,192,0,-1--1--1,,1|(1317,593)|
+11,370,0,1280,593,6,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,371,Reinversión,1280,627,46,26,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,372,120,370,1,0,43,0,0,192,0,-1--1--1,,1|(1214,667)|
+1,373,370,14,1,0,43,0,0,192,0,-1--1--1,,1|(1336,396)|
+///---\\\
+:L<%^E!@
+5:Depreciacion de equipamiento
+19:106,0
+24:0
+25:0
+26:0
+23:0
+15:0,0,0,0,0,0
+27:0,
+34:0,
+42:0
+72:0
+73:0
+95:0
+96:0
+97:0
+77:0
+78:0
+102:1
+93:0
+94:0
+92:0
+91:0
+90:0
+87:0
+75:
+43:
+103:8,8,8,3,8
+105:0,0,0,0,0,0,0,0,0,0
+104:Vensim Sans|12||0-0-0|0-0-0|-1--1--1|0-0-255|192-192-192|-1--1--1

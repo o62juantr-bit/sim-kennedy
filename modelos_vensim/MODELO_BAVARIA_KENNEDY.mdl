@@ -1,0 +1,1057 @@
+{UTF-8}
+Desgaste del equipamiento  = A FUNCTION OF( Tasa de desgaste del equipamiento) ~~|
+Desgaste del equipamiento = Capacidad de acopio y reparto*Tasa de desgaste del equipamiento
+	~	kg/Month/Month
+	~		|
+
+Merma en acopio  = A FUNCTION OF( Frecuencia de acopio,Frecuencia de acopio de referencia\
+		,Tasa base de merma) ~~|
+Merma en acopio = Producto en acopio*Tasa base de merma*Frecuencia de acopio de referencia\
+		/Frecuencia de acopio
+	~	kg/Month
+	~	Acopiar más seguido reduce la merma. Lo que se daña va a compostaje.
+	|
+
+Compras locales  = A FUNCTION OF( Capacidad efectiva de reparto,Demanda de tiendas y comedores\
+		,Producto en acopio,TIME STEP) ~~|
+Compras locales = MIN(Demanda de tiendas y comedores,MIN(Capacidad efectiva de reparto\
+		,MAX(0,Producto en acopio/TIME STEP
+-Merma en acopio)))
+	~	kg/Month
+	~	Lo que compran tiendas y comedores a la red. Limitado por demanda, \
+		capacidad y existencias.
+	|
+
+Maduración  = A FUNCTION OF( Tiempo de maduración) ~~|
+Maduración = Orgánicos en estación de compostaje/Tiempo de maduración
+	~	kg/Month
+	~	Retardo entre orgánicos crudos y compost maduro.
+	|
+
+Agotamiento del suelo  = A FUNCTION OF( Tiempo de agotamiento del suelo) ~~|
+Agotamiento del suelo = Fertilidad del suelo/Tiempo de agotamiento del suelo
+	~	kg/Month
+	~		|
+
+Incorporación de participantes  = A FUNCTION OF( Participación comunitaria,Participantes objetivo\
+		,Tiempo de incorporación) ~~|
+Incorporación de participantes = Participación comunitaria*MAX(0,Participantes objetivo\
+		-Participantes activos)/Tiempo de incorporación
+	~	persona/Month
+	~		|
+
+Sustrato entregado al distrito  = A FUNCTION OF( Distrito biotecnológico activo,Fracción de orgánicos para sustrato\
+		,Tiempo de entrega de sustrato) ~~|
+Sustrato entregado al distrito = Orgánicos en estación de compostaje*Fracción de orgánicos para sustrato\
+		/Tiempo de entrega de sustrato
+*Distrito biotecnológico activo
+	~	kg/Month
+	~		|
+
+Pérdida de conocimiento  = A FUNCTION OF( Tasa de olvido) ~~|
+Pérdida de conocimiento = Conocimiento compartido*Tasa de olvido
+	~	saber/Month
+	~		|
+
+Pérdida de proteína o hongos  = A FUNCTION OF( Tasa de pérdida de hongos) ~~|
+Pérdida de proteína o hongos = Inventario de proteína y hongos*Tasa de pérdida de hongos
+	~	kg/Month
+	~		|
+
+Autoconsumo  = A FUNCTION OF( Fracción de cosecha destinada al autoconsumo,Tiempo de salida de la cosecha\
+		) ~~|
+Autoconsumo = Cosecha disponible/Tiempo de salida de la cosecha*Fracción de cosecha destinada al autoconsumo
+	~	kg/Month
+	~		|
+
+Retiro de promotores  = A FUNCTION OF( Tasa de retiro de promotores) ~~|
+Retiro de promotores = Promotores formados y activos*Tasa de retiro de promotores
+	~	persona/Month
+	~		|
+
+Retiro por desgaste  = A FUNCTION OF( Sobrecarga de participantes,Tasa base de desgaste de participantes\
+		) ~~|
+Retiro por desgaste = Participantes activos*Tasa base de desgaste de participantes*(1\
+		+Sobrecarga de participantes)
+	~	persona/Month
+	~		|
+
+Cierre o abandono de huertas  = A FUNCTION OF( -Factor de apoyo,Tasa base de cierre) ~~|
+Cierre o abandono de huertas = Huertas activas*Tasa base de cierre*(1+(1-Factor de apoyo\
+		))
+	~	huerta/Month
+	~	Cierran más si tienen poco conocimiento y pocos participantes por huerta.
+	|
+
+Compost entregado a huertas  = A FUNCTION OF( Tiempo de entrega de compost) ~~|
+Compost entregado a huertas = Compost maduro/Tiempo de entrega de compost
+	~	kg/Month
+	~		|
+
+Pérdidas en huerta  = A FUNCTION OF( Fracción de pérdidas en huerta,Tiempo de salida de la cosecha\
+		) ~~|
+Pérdidas en huerta = Cosecha disponible/Tiempo de salida de la cosecha*Fracción de pérdidas en huerta
+	~	kg/Month
+	~		|
+
+Venta de proteína de hongos  = A FUNCTION OF( Demanda de proteína de hongos,-Pérdida de proteína o hongos\
+		,TIME STEP) ~~|
+Venta de proteína de hongos = MIN(Demanda de proteína de hongos,MAX(0,Inventario de proteína y hongos\
+		/TIME STEP-Pérdida de proteína o hongos
+))
+	~	kg/Month
+	~		|
+
+Gasto en insumos y reinversión  = A FUNCTION OF( Tiempo de ejecución del gasto) ~~|
+Gasto en insumos y reinversión = Ingreso acumulado por excedentes/Tiempo de ejecución del gasto
+	~	COP/Month
+	~		|
+
+Huertas activas = INTEG(Apertura de huertas-Cierre o abandono de huertas,10)
+	~	huerta
+	~	Huertas en producción. Valor inicial: SUPUESTO.
+	|
+
+Cosecha disponible = INTEG(Producción de las huertas-Autoconsumo-Excedente entregado al acopio\
+		-Pérdidas en huerta,100)
+	~	kg
+	~	Cosecha en la huerta antes de repartirse entre autoconsumo, venta y \
+		pérdidas.
+	|
+
+Producto en acopio = INTEG(Excedente entregado al acopio-Compras locales-Venta directa en feria\
+		-Merma en acopio,50)
+	~	kg
+	~	Excedente recibido por el equipo de acopio y reparto.
+	|
+
+Capacidad de acopio y reparto = INTEG(Ampliación de capacidad de acopio-Desgaste del equipamiento\
+		,250)
+	~	kg/Month
+	~	Kilos por mes que el acopio puede mover. Valor inicial: SUPUESTO.
+	|
+
+Participantes activos = INTEG(Incorporación de participantes-Retiro por desgaste,25)
+	~	persona
+	~	Personas que participan en las huertas y la red.
+	|
+
+Ingreso acumulado por excedentes = INTEG(Ingreso por ventas-Gasto en insumos y reinversión\
+		,0)
+	~	COP
+	~	Fondo de la red: ventas que aún no se han reinvertido.
+	|
+
+Conocimiento compartido = INTEG(Formación e intercambio-Pérdida de conocimiento,30)
+	~	saber
+	~	Índice de saberes (suelo, semillas, compost) circulando en la red. Unidad \
+		ficticia: SUPUESTO.
+	|
+
+Orgánicos en estación de compostaje = INTEG(Orgánicos recibidos+Merma en acopio-Maduración\
+		-Sustrato entregado al distrito,50)
+	~	kg
+	~	Orgánicos crudos. La merma del acopio vuelve aquí.
+	|
+
+Compost maduro = INTEG(Maduración-Compost entregado a huertas,0)
+	~	kg
+	~	Compost listo para entregar. Separado de los orgánicos crudos.
+	|
+
+Fertilidad del suelo = INTEG(Compost entregado a huertas-Agotamiento del suelo,150)
+	~	kg
+	~	Compost acumulado en el suelo de todas las huertas, en kilos equivalentes.
+	|
+
+Inventario de proteína y hongos = INTEG(Cosecha y procesamiento de hongos y proteína\
+		-Venta de proteína de hongos-Pérdida de proteína o hongos,0)
+	~	kg
+	~		|
+
+Presión sobre el humedal = INTEG(Actividad en el borde-Recuperación natural del humedal\
+		,0.1)
+	~	Dmnl
+	~	Índice 0 a 1 o más. Sobre 1 el humedal está en riesgo. Escala: SUPUESTO.
+	|
+
+Promotores formados y activos = INTEG(Formación de promotores en Bavaria-Retiro de promotores\
+		,2)
+	~	persona
+	~		|
+
+Apertura de huertas = (Aperturas espontáneas+Promotores formados y activos*Huertas nuevas por promotor\
+		)*Efecto del ingreso en la apertura*MAX(0,1-Huertas activas/Huertas potenciales)*Freno por humedal
+	~	huerta/Month
+	~	Los promotores formados en Bavaria abren huertas; el ingreso las atrae; el \
+		suelo disponible y el humedal las frenan.
+	|
+
+Producción de las huertas = Huertas activas*Rendimiento por huerta*Efecto de la fertilidad\
+		*Efecto del conocimiento en producción
+	~	kg/Month
+	~	Con cero huertas es cero. Viene de una nube; las huertas la influyen, no \
+		la pierden.
+	|
+
+Excedente entregado al acopio = Cosecha disponible/Tiempo de salida de la cosecha*Fracción de cosecha destinada a la venta
+	~	kg/Month
+	~		|
+
+Venta directa en feria = MIN(Demanda de feria,MAX(0,Producto en acopio/TIME STEP-Merma en acopio\
+		-Compras locales))
+	~	kg/Month
+	~		|
+
+Ampliación de capacidad de acopio = Gasto en insumos y reinversión*Fracción del gasto destinada a capacidad\
+		/Costo de ampliar capacidad
+	~	kg/Month/Month
+	~	Cierra el circuito: lo que se vende se reinvierte en capacidad.
+	|
+
+Ingreso por ventas = (Compras locales+Venta directa en feria)*Precio de venta local+Venta de proteína de hongos\
+		*Precio de la proteína de hongos
+	~	COP/Month
+	~		|
+
+Orgánicos recibidos = Disponibilidad de residuos orgánicos*Frecuencia de recolección\
+		/(Frecuencia de recolección+Frecuencia de media saturación de la recolección)
+	~	kg/Month
+	~	Recolectar más seguido captura más orgánicos, con rendimientos \
+		decrecientes.
+	|
+
+Cosecha y procesamiento de hongos y proteína = Sustrato entregado al distrito*Rendimiento de hongos por kg de sustrato
+	~	kg/Month
+	~	Los hongos dependen del sustrato que llega del compostaje.
+	|
+
+Actividad en el borde = Huertas activas*Fracción de huertas en el borde*Presión por huerta de borde
+	~	1/Month
+	~	Solo las huertas del borde presionan el humedal.
+	|
+
+Recuperación natural del humedal = Presión sobre el humedal*Tasa de recuperación natural\
+		*(1+Normativa ambiental de ronda)
+	~	1/Month
+	~	Una norma más estricta acelera la recuperación.
+	|
+
+Formación de promotores en Bavaria = MIN(Capacidad de formación,Candidatos disponibles\
+		/Tiempo de formación de promotores)
+	~	persona/Month
+	~		|
+
+Formación e intercambio = Promotores formados y activos*Conocimiento generado por promotor\
+		+Participantes activos*Intercambio entre pares
+	~	saber/Month
+	~	Viene de una nube; promotores y participantes la influyen.
+	|
+
+Capacidad efectiva de reparto = Capacidad de acopio y reparto*MIN(1,Frecuencia de acopio\
+		/Frecuencia de acopio de referencia)
+	~	kg/Month
+	~	La capacidad se aprovecha por completo solo si se acopia con la frecuencia \
+		de referencia.
+	|
+
+Compras al mayorista = MAX(0,Demanda de tiendas y comedores-Compras locales)
+	~	kg/Month
+	~	Demanda que la red local no cubre y se sigue comprando a Corabastos.
+	|
+
+Dependencia del mayorista = ZIDZ(Compras al mayorista,Demanda de tiendas y comedores)
+	~	Dmnl
+	~	INDICADOR CENTRAL: 1 es depender por completo del mayorista, 0 es no \
+		depender. Mide el objetivo general y el OE2.
+	|
+
+Efecto del ingreso en la apertura = 1+Sensibilidad de la apertura al ingreso*MIN(1,ZIDZ\
+		(Ingreso por ventas,Huertas activas)/Ingreso de referencia por huerta)
+	~	Dmnl
+	~	Si cada huerta genera ingreso, más vecinos se animan a abrir la suya.
+	|
+
+Fertilidad por huerta = ZIDZ(Fertilidad del suelo,Huertas activas)
+	~	kg/huerta
+	~		|
+
+Conocimiento por huerta = ZIDZ(Conocimiento compartido,Huertas activas)
+	~	saber/huerta
+	~	Baja cuando las huertas crecen más rápido que el conocimiento: \
+		saturación del acompañamiento.
+	|
+
+Participantes por huerta = ZIDZ(Participantes activos,Huertas activas)
+	~	persona/huerta
+	~		|
+
+Efecto de la fertilidad = Efecto mínimo de la fertilidad+(1-Efecto mínimo de la fertilidad\
+		)*MIN(1,Fertilidad por huerta/Fertilidad de referencia por huerta)
+	~	Dmnl
+	~		|
+
+Efecto del conocimiento en producción = 1+Aumento máximo de rendimiento por conocimiento\
+		*MIN(1,Conocimiento por huerta/Conocimiento de referencia por huerta)
+	~	Dmnl
+	~	Aquí es donde Bavaria llega a las huertas: el conocimiento sube el \
+		rendimiento.
+	|
+
+Factor de apoyo = (MIN(1,Conocimiento por huerta/Conocimiento de referencia por huerta\
+		)+MIN(1,Participantes por huerta/Participantes de referencia por huerta))/2
+	~	Dmnl
+	~	0 a 1. Qué tan sostenida está cada huerta por saber y por personas.
+	|
+
+Fracción de cosecha destinada a la venta = 1-Fracción de cosecha destinada al autoconsumo\
+		-Fracción de pérdidas en huerta
+	~	Dmnl
+	~	Autoconsumo, venta y pérdidas suman 1.
+	|
+
+Disponibilidad de residuos orgánicos = Residuos de hogares y comercios+Huertas activas\
+		*Residuo propio por huerta
+	~	kg/Month
+	~		|
+
+Freno por humedal = MAX(0,1-Normativa ambiental de ronda*Presión sobre el humedal/Presión crítica del humedal\
+		)
+	~	Dmnl
+	~	Cuando la presión se acerca al nivel crítico, se frena la apertura de \
+		huertas.
+	|
+
+Capacidad de formación = Formadores de Bavaria*Promotores formados por formador
+	~	persona/Month
+	~	Con cero formadores no hay promotores nuevos: es la simulación sin \
+		Bavaria.
+	|
+
+Candidatos disponibles = MAX(0,Participantes activos*Fracción de participantes que pueden ser promotores\
+		-Promotores formados y activos)
+	~	persona
+	~		|
+
+Participantes objetivo = Huertas activas*Participantes objetivo por huerta
+	~	persona
+	~		|
+
+Sobrecarga de participantes = MIN(3,MAX(0,ZIDZ(Huertas activas,Participantes activos)\
+		/Carga tolerable por participante-1))
+	~	Dmnl
+	~	Si hay muchas huertas por persona, el desgaste sube.
+	|
+
+Normativa ambiental de ronda = 0.5
+	~	Dmnl
+	~	SUPUESTO por validar con datos de Kennedy. 0 sin norma, 1 norma estricta.
+	|
+
+Presión crítica del humedal = 1
+	~	Dmnl
+	~	SUPUESTO por validar con datos de Kennedy.
+	|
+
+Aperturas espontáneas = 0.15
+	~	huerta/Month
+	~	SUPUESTO por validar con datos de Kennedy. Huertas que abren los vecinos \
+		sin pasar por Bavaria.
+	|
+
+Huertas nuevas por promotor = 0.08
+	~	huerta/persona/Month
+	~	SUPUESTO por validar con datos de Kennedy.
+	|
+
+Huertas potenciales = 120
+	~	huerta
+	~	SUPUESTO por validar con datos de Kennedy. Techos, patios, lotes y bordes \
+		disponibles.
+	|
+
+Sensibilidad de la apertura al ingreso = 0.5
+	~	Dmnl
+	~	SUPUESTO por validar con datos de Kennedy.
+	|
+
+Ingreso de referencia por huerta = 100000
+	~	COP/huerta/Month
+	~	SUPUESTO por validar con datos de Kennedy.
+	|
+
+Tasa base de cierre = 0.03
+	~	1/Month
+	~	SUPUESTO por validar con datos de Kennedy.
+	|
+
+Rendimiento por huerta = 60
+	~	kg/huerta/Month
+	~	SUPUESTO por validar con datos de Kennedy.
+	|
+
+Efecto mínimo de la fertilidad = 0.6
+	~	Dmnl
+	~	SUPUESTO por validar con datos de Kennedy. Rendimiento relativo con suelo \
+		sin compost.
+	|
+
+Fertilidad de referencia por huerta = 30
+	~	kg/huerta
+	~	SUPUESTO por validar con datos de Kennedy.
+	|
+
+Aumento máximo de rendimiento por conocimiento = 0.5
+	~	Dmnl
+	~	SUPUESTO por validar con datos de Kennedy.
+	|
+
+Conocimiento de referencia por huerta = 5
+	~	saber/huerta
+	~	SUPUESTO por validar con datos de Kennedy.
+	|
+
+Participantes de referencia por huerta = 3
+	~	persona/huerta
+	~	SUPUESTO por validar con datos de Kennedy.
+	|
+
+Tiempo de salida de la cosecha = 0.5
+	~	Month
+	~	SUPUESTO por validar con datos de Kennedy.
+	|
+
+Fracción de cosecha destinada al autoconsumo = 0.4
+	~	Dmnl
+	~	SUPUESTO por validar con datos de Kennedy.
+	|
+
+Fracción de pérdidas en huerta = 0.1
+	~	Dmnl
+	~	SUPUESTO por validar con datos de Kennedy.
+	|
+
+Frecuencia de acopio = 4
+	~	1/Month
+	~	SUPUESTO por validar con datos de Kennedy. Veces por mes. 4 es semanal.
+	|
+
+Frecuencia de acopio de referencia = 4
+	~	1/Month
+	~	SUPUESTO por validar con datos de Kennedy.
+	|
+
+Tasa base de merma = 0.1
+	~	1/Month
+	~	SUPUESTO por validar con datos de Kennedy.
+	|
+
+Demanda de tiendas y comedores = 1500
+	~	kg/Month
+	~	SUPUESTO por validar con datos de Kennedy. Demanda del área simulada. \
+		Dato por conseguir (SIM1).
+	|
+
+Demanda de feria = 200
+	~	kg/Month
+	~	SUPUESTO por validar con datos de Kennedy.
+	|
+
+Tasa de desgaste del equipamiento = 0.02
+	~	1/Month
+	~	SUPUESTO por validar con datos de Kennedy.
+	|
+
+Fracción del gasto destinada a capacidad = 0.3
+	~	Dmnl
+	~	SUPUESTO por validar con datos de Kennedy. El resto se gasta en insumos.
+	|
+
+Costo de ampliar capacidad = 12000
+	~	COP*Month/kg
+	~	SUPUESTO por validar con datos de Kennedy. Pesos por cada kg/mes de \
+		capacidad nueva.
+	|
+
+Precio de venta local = 2500
+	~	COP/kg
+	~	SUPUESTO por validar con datos de Kennedy.
+	|
+
+Precio de la proteína de hongos = 12000
+	~	COP/kg
+	~	SUPUESTO por validar con datos de Kennedy.
+	|
+
+Tiempo de ejecución del gasto = 2
+	~	Month
+	~	SUPUESTO por validar con datos de Kennedy.
+	|
+
+Residuos de hogares y comercios = 300
+	~	kg/Month
+	~	SUPUESTO por validar con datos de Kennedy. Orgánicos captables. Las \
+		cifras de la matriz (50,9 frente a
+	|
+
+Residuo propio por huerta = 10
+	~	kg/huerta/Month
+	~	SUPUESTO por validar con datos de Kennedy.
+	|
+
+Frecuencia de recolección = 4
+	~	1/Month
+	~	SUPUESTO por validar con datos de Kennedy.
+	|
+
+Frecuencia de media saturación de la recolección = 2
+	~	1/Month
+	~	SUPUESTO por validar con datos de Kennedy.
+	|
+
+Tiempo de maduración = 3
+	~	Month
+	~	SUPUESTO por validar con datos de Kennedy.
+	|
+
+Tiempo de entrega de compost = 1
+	~	Month
+	~	SUPUESTO por validar con datos de Kennedy.
+	|
+
+Tiempo de agotamiento del suelo = 6
+	~	Month
+	~	SUPUESTO por validar con datos de Kennedy.
+	|
+
+Fracción de orgánicos para sustrato = 0.2
+	~	Dmnl
+	~	SUPUESTO por validar con datos de Kennedy.
+	|
+
+Tiempo de entrega de sustrato = 1
+	~	Month
+	~	SUPUESTO por validar con datos de Kennedy.
+	|
+
+Distrito biotecnológico activo = 1
+	~	Dmnl
+	~	SUPUESTO por validar con datos de Kennedy. Interruptor: 1 existe el \
+		distrito, 0 no existe.
+	|
+
+Rendimiento de hongos por kg de sustrato = 0.15
+	~	Dmnl
+	~	SUPUESTO por validar con datos de Kennedy. Hipótesis; el costo real está \
+		por demostrar.
+	|
+
+Demanda de proteína de hongos = 100
+	~	kg/Month
+	~	SUPUESTO por validar con datos de Kennedy.
+	|
+
+Tasa de pérdida de hongos = 0.1
+	~	1/Month
+	~	SUPUESTO por validar con datos de Kennedy.
+	|
+
+Fracción de huertas en el borde = 0.15
+	~	Dmnl
+	~	SUPUESTO por validar con datos de Kennedy.
+	|
+
+Presión por huerta de borde = 0.01
+	~	1/huerta/Month
+	~	SUPUESTO por validar con datos de Kennedy.
+	|
+
+Tasa de recuperación natural = 0.05
+	~	1/Month
+	~	SUPUESTO por validar con datos de Kennedy.
+	|
+
+Formadores de Bavaria = 3
+	~	persona
+	~	SUPUESTO por validar con datos de Kennedy. Palanca principal de la \
+		simulación: 0 es sin Bavaria.
+	|
+
+Promotores formados por formador = 0.2
+	~	1/Month
+	~	SUPUESTO por validar con datos de Kennedy.
+	|
+
+Fracción de participantes que pueden ser promotores = 0.25
+	~	Dmnl
+	~	SUPUESTO por validar con datos de Kennedy.
+	|
+
+Tiempo de formación de promotores = 3
+	~	Month
+	~	SUPUESTO por validar con datos de Kennedy.
+	|
+
+Tasa de retiro de promotores = 0.03
+	~	1/Month
+	~	SUPUESTO por validar con datos de Kennedy.
+	|
+
+Conocimiento generado por promotor = 0.5
+	~	saber/persona/Month
+	~	SUPUESTO por validar con datos de Kennedy.
+	|
+
+Intercambio entre pares = 0.05
+	~	saber/persona/Month
+	~	SUPUESTO por validar con datos de Kennedy.
+	|
+
+Tasa de olvido = 0.04
+	~	1/Month
+	~	SUPUESTO por validar con datos de Kennedy.
+	|
+
+Participación comunitaria = 0.5
+	~	Dmnl
+	~	SUPUESTO por validar con datos de Kennedy. 0 a 1: qué tanta gente se suma.
+	|
+
+Participantes objetivo por huerta = 4
+	~	persona/huerta
+	~	SUPUESTO por validar con datos de Kennedy.
+	|
+
+Tiempo de incorporación = 4
+	~	Month
+	~	SUPUESTO por validar con datos de Kennedy.
+	|
+
+Tasa base de desgaste de participantes = 0.03
+	~	1/Month
+	~	SUPUESTO por validar con datos de Kennedy.
+	|
+
+Carga tolerable por participante = 0.5
+	~	huerta/persona
+	~	SUPUESTO por validar con datos de Kennedy.
+	|
+
+********************************************************
+	.Control
+********************************************************~
+		Simulation Control Parameters
+	|
+
+FINAL TIME  = 48
+	~	Month
+	~	Horizonte de la simulación: 48 meses.
+	|
+
+INITIAL TIME  = 0
+	~	Month
+	~	The initial time for the simulation.
+	|
+
+SAVEPER  = 1
+	~	Month [0,?]
+	~	The frequency with which output is stored.
+	|
+
+TIME STEP  = 0.25
+	~	Month [0,?]
+	~	The time step for the simulation.
+	|
+
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*View 1
+$-1--1--1,0,|12||-1--1--1|-1--1--1|-1--1--1|-1--1--1|-1--1--1|96,96,28,2
+10,1,Huertas activas,2216,2426,131,53,3,3,0,42,-1,1,0,0,0-0-0,0-0-0,Arial Black|20||0-0-0,0,0,0,0,0,0
+10,2,Cosecha disponible,3106,2252,131,53,3,3,0,42,-1,1,0,0,0-0-0,0-0-0,Arial Black|20||0-0-0,0,0,0,0,0,0
+10,3,Producto en acopio,3102,1807,131,53,3,3,0,42,-1,1,0,0,0-0-0,0-0-0,Arial Black|20||0-0-0,0,0,0,0,0,0
+10,4,Capacidad de acopio y reparto,2379,1321,131,53,3,3,0,42,-1,1,0,0,0-0-0,0-0-0,Arial Black|20||0-0-0,0,0,0,0,0,0
+10,5,Participantes activos,6033,2205,131,53,3,3,0,42,-1,1,0,0,0-0-0,0-0-0,Arial Black|20||0-0-0,0,0,0,0,0,0
+10,6,Ingreso acumulado por excedentes,4662,2883,131,53,3,3,0,42,-1,1,0,0,0-0-0,0-0-0,Arial Black|20||0-0-0,0,0,0,0,0,0
+10,7,Conocimiento compartido,6517,3932,131,53,3,3,0,42,-1,1,0,0,0-0-0,0-0-0,Arial Black|20||0-0-0,0,0,0,0,0,0
+10,8,Orgánicos en estación de compostaje,2210,1981,131,53,3,3,0,42,-1,1,0,0,0-0-0,0-0-0,Arial Black|20||0-0-0,0,0,0,0,0,0
+10,9,Compost maduro,2210,2219,131,53,3,3,0,42,-1,1,0,0,0-0-0,0-0-0,Arial Black|20||0-0-0,0,0,0,0,0,0
+10,10,Fertilidad del suelo,1683,2217,131,53,3,3,0,42,-1,1,0,0,0-0-0,0-0-0,Arial Black|20||0-0-0,0,0,0,0,0,0
+10,11,Inventario de proteína y hongos,4822,1731,131,53,3,3,0,42,-1,1,0,0,0-0-0,0-0-0,Arial Black|20||0-0-0,0,0,0,0,0,0
+10,12,Presión sobre el humedal,902,2094,131,53,3,3,0,42,-1,1,0,0,0-0-0,0-0-0,Arial Black|20||0-0-0,0,0,0,0,0,0
+10,13,Promotores formados y activos,6093,3334,131,53,3,3,0,42,-1,1,0,0,0-0-0,0-0-0,Arial Black|20||0-0-0,0,0,0,0,0,0
+12,14,48,1606,2425,10,8,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,15,17,14,100,0,0,22,0,192,0,-1--1--1,,1|(1730,2425)|
+1,16,17,1,4,0,0,22,0,192,0,-1--1--1,,1|(1971,2425)|
+11,17,0,1850,2425,6,8,34,3,0,2,1,0,0,0,0-0-0,0-0-0,|||0-0-0,0,0,0,0,0,0
+10,18,Apertura de huertas,1850,2465,64,26,40,3,0,34,-1,0,0,0,0-0-0,0-0-0,Vensim Sans ExtraBold|||0-0-0,0,0,0,0,0,0
+12,19,48,2275,2687,10,8,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,20,22,1,100,0,0,22,0,192,0,-1--1--1,,1|(2172,2519)|
+1,21,22,19,4,0,0,22,0,192,0,-1--1--1,,1|(2275,2568)|
+11,22,0,2172,2568,6,8,34,3,0,2,1,0,0,0,0-0-0,0-0-0,|||0-0-0,0,0,0,0,0,0
+10,23,Cierre o abandono de huertas,2172,2602,90,26,40,3,0,34,-1,0,0,0,0-0-0,0-0-0,Vensim Sans ExtraBold|||0-0-0,0,0,0,0,0,0
+12,24,48,2695,2252,10,8,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,25,27,24,100,0,0,22,0,192,0,-1--1--1,,1|(2767,2252)|
+1,26,27,2,4,0,0,22,0,192,0,-1--1--1,,1|(2908,2252)|
+11,27,0,2835,2252,6,8,34,3,0,2,1,0,0,0,0-0-0,0-0-0,|||0-0-0,0,0,0,0,0,0
+10,28,Producción de las huertas,2835,2292,81,26,40,3,0,34,-1,0,0,0,0-0-0,0-0-0,Vensim Sans ExtraBold|||0-0-0,0,0,0,0,0,0
+12,29,48,3713,2252,10,8,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,30,32,2,100,0,0,22,0,192,0,-1--1--1,,1|(3361,2252)|
+1,31,32,29,4,0,0,22,0,192,0,-1--1--1,,1|(3600,2252)|
+11,32,0,3491,2252,6,8,34,3,0,2,1,0,0,0,0-0-0,0-0-0,|||0-0-0,0,0,0,0,0,0
+10,33,Autoconsumo,3491,2282,72,16,40,3,0,34,-1,0,0,0,0-0-0,0-0-0,Vensim Sans ExtraBold|||0-0-0,0,0,0,0,0,0
+12,34,48,3106,2650,10,8,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,35,37,2,100,0,0,22,0,192,0,-1--1--1,,1|(3106,2386)|
+1,36,37,34,4,0,0,22,0,192,0,-1--1--1,,1|(3106,2560)|
+11,37,0,3106,2473,8,6,33,3,0,2,4,0,0,0,0-0-0,0-0-0,|||0-0-0,0,0,0,0,0,0
+10,38,Pérdidas en huerta,3181,2473,61,26,40,3,0,34,-1,0,0,0,0-0-0,0-0-0,Vensim Sans ExtraBold|||0-0-0,0,0,0,0,0,0
+1,39,41,2,100,0,0,22,0,192,0,-1--1--1,,1|(3104,2117)|
+1,40,41,3,4,0,0,22,0,192,0,-1--1--1,,1|(3104,1941)|
+11,41,0,3104,2029,8,6,33,3,0,2,4,0,0,0,0-0-0,0-0-0,|||0-0-0,0,0,0,0,0,0
+10,42,Excedente entregado al acopio,3211,2029,93,26,40,3,0,34,-1,0,0,0,0-0-0,0-0-0,Vensim Sans ExtraBold|||0-0-0,0,0,0,0,0,0
+12,43,48,3764,1813,10,8,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,44,46,3,100,0,0,22,0,192,0,-1--1--1,,1|(3364,1813)|
+1,45,46,43,4,0,0,22,0,192,0,-1--1--1,,1|(3630,1813)|
+11,46,0,3501,1813,6,8,34,3,0,2,1,0,0,0,0-0-0,0-0-0,|||0-0-0,0,0,0,0,0,0
+10,47,Compras locales,3501,1838,103,17,40,3,0,34,-1,0,0,0,0-0-0,0-0-0,Vensim Sans ExtraBold|||0-0-0,0,0,0,0,0,0
+12,48,48,3102,1393,10,8,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,49,51,3,100,0,0,22,0,192,0,-1--1--1,,1|(3102,1668)|
+1,50,51,48,4,0,0,22,0,192,0,-1--1--1,,1|(3102,1486)|
+11,51,0,3102,1577,8,6,33,3,0,2,4,0,0,0,0-0-0,0-0-0,|||0-0-0,0,0,0,0,0,0
+10,52,Venta directa en feria,3188,1577,72,26,40,3,0,34,-1,0,0,0,0-0-0,0-0-0,Vensim Sans ExtraBold|||0-0-0,0,0,0,0,0,0
+1,53,55,3,100,0,0,22,0,192,0,-1--1--1,,1|(2656,1807)|
+1,54,55,8,4,0,0,22,0,192,0,-1--1--1,,1|(2210,1894)|
+11,55,0,2656,1894,6,8,34,3,0,2,1,0,0,0,0-0-0,0-0-0,|||0-0-0,0,0,0,0,0,0
+10,56,Merma en acopio,2656,1924,95,16,40,3,0,34,-1,0,0,0,0-0-0,0-0-0,Vensim Sans ExtraBold|||0-0-0,0,0,0,0,0,0
+12,57,48,1866,1322,10,8,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,58,60,57,100,0,0,22,0,192,0,-1--1--1,,1|(1966,1322)|
+1,59,60,4,4,0,0,22,0,192,0,-1--1--1,,1|(2158,1322)|
+11,60,0,2062,1322,6,8,34,3,0,2,1,0,0,0,0-0-0,0-0-0,|||0-0-0,0,0,0,0,0,0
+10,61,Ampliación de capacidad de acopio,2062,1372,72,36,40,3,0,34,-1,0,0,0,0-0-0,0-0-0,Vensim Sans ExtraBold|||0-0-0,0,0,0,0,0,0
+12,62,48,2973,1321,10,8,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,63,65,4,100,0,0,22,0,192,0,-1--1--1,,1|(2620,1321)|
+1,64,65,62,4,0,0,22,0,192,0,-1--1--1,,1|(2852,1321)|
+11,65,0,2736,1321,6,8,34,3,0,2,1,0,0,0,0-0-0,0-0-0,|||0-0-0,0,0,0,0,0,0
+10,66,Desgaste del equipamiento,2736,1361,81,26,40,3,0,34,-1,0,0,0,0-0-0,0-0-0,Vensim Sans ExtraBold|||0-0-0,0,0,0,0,0,0
+12,67,48,5281,2181,10,8,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,68,70,67,100,0,0,22,0,192,0,-1--1--1,,1|(5281,2193)|
+1,69,70,5,4,0,0,22,0,192,0,-1--1--1,,1|(5752,2193)|
+11,70,0,5596,2193,6,8,34,3,0,2,1,0,0,0,0-0-0,0-0-0,|||0-0-0,0,0,0,0,0,0
+10,71,Incorporación de participantes,5596,2233,95,26,40,3,0,34,-1,0,0,0,0-0-0,0-0-0,Vensim Sans ExtraBold|||0-0-0,0,0,0,0,0,0
+12,72,48,6626,2205,10,8,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,73,75,5,100,0,0,22,0,192,0,-1--1--1,,1|(6274,2205)|
+1,74,75,72,4,0,0,22,0,192,0,-1--1--1,,1|(6506,2205)|
+11,75,0,6390,2205,6,8,34,3,0,2,1,0,0,0,0-0-0,0-0-0,|||0-0-0,0,0,0,0,0,0
+10,76,Retiro por desgaste,6390,2245,64,26,40,3,0,34,-1,0,0,0,0-0-0,0-0-0,Vensim Sans ExtraBold|||0-0-0,0,0,0,0,0,0
+12,77,48,4067,2888,10,8,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,78,80,77,100,0,0,22,0,192,0,-1--1--1,,1|(4187,2888)|
+1,79,80,6,4,0,0,22,0,192,0,-1--1--1,,1|(4420,2888)|
+11,80,0,4304,2888,6,8,34,3,0,2,1,0,0,0,0-0-0,0-0-0,|||0-0-0,0,0,0,0,0,0
+10,81,Ingreso por ventas,4304,2928,61,26,40,3,0,34,-1,0,0,0,0-0-0,0-0-0,Vensim Sans ExtraBold|||0-0-0,0,0,0,0,0,0
+12,82,48,5230,2883,10,8,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,83,85,6,100,0,0,22,0,192,0,-1--1--1,,1|(4896,2883)|
+1,84,85,82,4,0,0,22,0,192,0,-1--1--1,,1|(5116,2883)|
+11,85,0,5006,2883,6,8,34,3,0,2,1,0,0,0,0-0-0,0-0-0,|||0-0-0,0,0,0,0,0,0
+10,86,Gasto en insumos y reinversión,5006,2923,95,26,40,3,0,34,-1,0,0,0,0-0-0,0-0-0,Vensim Sans ExtraBold|||0-0-0,0,0,0,0,0,0
+12,87,48,7029,3932,10,8,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,88,90,7,100,0,0,22,0,192,0,-1--1--1,,1|(6745,3932)|
+1,89,90,87,4,0,0,22,0,192,0,-1--1--1,,1|(6937,3932)|
+11,90,0,6849,3932,6,8,34,3,0,2,1,0,0,0,0-0-0,0-0-0,|||0-0-0,0,0,0,0,0,0
+10,91,Pérdida de conocimiento,6849,3966,75,26,40,3,0,34,-1,0,0,0,0-0-0,0-0-0,Vensim Sans ExtraBold|||0-0-0,0,0,0,0,0,0
+12,92,48,6507,3673,10,8,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,93,95,92,100,0,0,22,0,192,0,-1--1--1,,1|(6507,3710)|
+1,94,95,7,4,0,0,22,0,192,0,-1--1--1,,1|(6507,3815)|
+11,95,0,6507,3745,8,6,33,3,0,2,4,0,0,0,0-0-0,0-0-0,|||0-0-0,0,0,0,0,0,0
+10,96,Formación e intercambio,6590,3745,75,26,40,3,0,34,-1,0,0,0,0-0-0,0-0-0,Vensim Sans ExtraBold|||0-0-0,0,0,0,0,0,0
+12,97,48,1713,1980,10,8,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,98,100,97,100,0,0,22,0,192,0,-1--1--1,,1|(1809,1980)|
+1,99,100,8,4,0,0,22,0,192,0,-1--1--1,,1|(1993,1980)|
+11,100,0,1901,1980,6,8,34,3,0,2,1,0,0,0,0-0-0,0-0-0,|||0-0-0,0,0,0,0,0,0
+10,101,Orgánicos recibidos,1901,2020,64,26,40,3,0,34,-1,0,0,0,0-0-0,0-0-0,Vensim Sans ExtraBold|||0-0-0,0,0,0,0,0,0
+1,102,104,8,100,0,0,22,0,192,0,-1--1--1,,1|(2210,2063)|
+1,103,104,9,4,0,0,22,0,192,0,-1--1--1,,1|(2210,2135)|
+11,104,0,2210,2099,8,6,33,3,0,2,4,0,0,0,0-0-0,0-0-0,|||0-0-0,0,0,0,0,0,0
+10,105,Maduración,2290,2099,66,16,40,3,0,34,-1,0,0,0,0-0-0,0-0-0,Vensim Sans ExtraBold|||0-0-0,0,0,0,0,0,0
+1,106,108,9,100,0,0,22,0,192,0,-1--1--1,,1|(2025,2219)|
+1,107,108,10,4,0,0,22,0,192,0,-1--1--1,,1|(1887,2219)|
+11,108,0,1965,2219,6,8,34,3,0,2,1,0,0,0,0-0-0,0-0-0,|||0-0-0,0,0,0,0,0,0
+10,109,Compost entregado a huertas,1965,2259,87,26,40,3,0,34,-1,0,0,0,0-0-0,0-0-0,Vensim Sans ExtraBold|||0-0-0,0,0,0,0,0,0
+12,110,48,1355,2214,10,8,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,111,113,10,100,0,0,22,0,192,0,-1--1--1,,1|(1507,2214)|
+1,112,113,110,4,0,0,22,0,192,0,-1--1--1,,1|(1407,2214)|
+11,113,0,1455,2214,6,8,34,3,0,2,1,0,0,0,0-0-0,0-0-0,|||0-0-0,0,0,0,0,0,0
+10,114,Agotamiento del suelo,1455,2248,69,26,40,3,0,34,-1,0,0,0,0-0-0,0-0-0,Vensim Sans ExtraBold|||0-0-0,0,0,0,0,0,0
+12,115,48,2825,1981,10,8,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,116,118,8,100,0,0,22,0,192,0,-1--1--1,,1|(2456,1981)|
+1,117,118,115,4,0,0,22,0,192,0,-1--1--1,,1|(2699,1981)|
+11,118,0,2578,1981,6,8,34,3,0,2,1,0,0,0,0-0-0,0-0-0,|||0-0-0,0,0,0,0,0,0
+10,119,Sustrato entregado al distrito,2578,2021,95,26,40,3,0,34,-1,0,0,0,0-0-0,0-0-0,Vensim Sans ExtraBold|||0-0-0,0,0,0,0,0,0
+12,120,48,4224,1747,10,8,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,121,123,120,100,0,0,22,0,192,0,-1--1--1,,1|(4224,1739)|
+1,122,123,11,4,0,0,22,0,192,0,-1--1--1,,1|(4579,1739)|
+11,123,0,4462,1739,6,8,34,3,0,2,1,0,0,0,0-0-0,0-0-0,|||0-0-0,0,0,0,0,0,0
+10,124,Cosecha y procesamiento de hongos y proteína,4462,1789,94,36,40,3,0,34,-1,0,0,0,0-0-0,0-0-0,Vensim Sans ExtraBold|||0-0-0,0,0,0,0,0,0
+12,125,48,5403,1731,10,8,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,126,128,11,100,0,0,22,0,192,0,-1--1--1,,1|(5060,1731)|
+1,127,128,125,4,0,0,22,0,192,0,-1--1--1,,1|(5286,1731)|
+11,128,0,5173,1731,6,8,34,3,0,2,1,0,0,0,0-0-0,0-0-0,|||0-0-0,0,0,0,0,0,0
+10,129,Venta de proteína de hongos,5173,1771,87,26,40,3,0,34,-1,0,0,0,0-0-0,0-0-0,Vensim Sans ExtraBold|||0-0-0,0,0,0,0,0,0
+12,130,48,4822,2119,10,8,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,131,133,11,100,0,0,22,0,192,0,-1--1--1,,1|(4822,1862)|
+1,132,133,130,4,0,0,22,0,192,0,-1--1--1,,1|(4822,2032)|
+11,133,0,4822,1947,8,6,33,3,0,2,4,0,0,0,0-0-0,0-0-0,|||0-0-0,0,0,0,0,0,0
+10,134,Pérdida de proteína o hongos,4926,1947,90,26,40,3,0,34,-1,0,0,0,0-0-0,0-0-0,Vensim Sans ExtraBold|||0-0-0,0,0,0,0,0,0
+12,135,48,309,2088,10,8,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,136,138,135,100,0,0,22,0,192,0,-1--1--1,,1|(429,2088)|
+1,137,138,12,4,0,0,22,0,192,0,-1--1--1,,1|(661,2088)|
+11,138,0,545,2088,6,8,34,3,0,2,1,0,0,0,0-0-0,0-0-0,|||0-0-0,0,0,0,0,0,0
+10,139,Actividad en el borde,545,2128,69,26,40,3,0,34,-1,0,0,0,0-0-0,0-0-0,Vensim Sans ExtraBold|||0-0-0,0,0,0,0,0,0
+12,140,48,1519,2094,10,8,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,141,143,12,100,0,0,22,0,192,0,-1--1--1,,1|(1149,2094)|
+1,142,143,140,4,0,0,22,0,192,0,-1--1--1,,1|(1393,2094)|
+11,143,0,1271,2094,6,8,34,3,0,2,1,0,0,0,0-0-0,0-0-0,|||0-0-0,0,0,0,0,0,0
+10,144,Recuperación natural del humedal,1271,2134,101,26,40,3,0,34,-1,0,0,0,0-0-0,0-0-0,Vensim Sans ExtraBold|||0-0-0,0,0,0,0,0,0
+12,145,48,5419,3256,10,8,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,146,148,145,100,0,0,22,0,192,0,-1--1--1,,1|(5556,3256)|
+1,147,148,13,4,0,0,22,0,192,0,-1--1--1,,1|(6093,3256)|
+11,148,0,5690,3256,6,8,34,3,0,2,1,0,0,0,0-0-0,0-0-0,|||0-0-0,0,0,0,0,0,0
+10,149,Formación de promotores en Bavaria,5690,3294,76,30,40,3,0,34,-1,0,0,0,0-0-0,0-0-0,Vensim Sans ExtraBold|||0-0-0,0,0,0,0,0,0
+12,150,48,6777,3567,10,8,0,3,0,0,-1,0,0,0,0,0,0,0,0,0
+1,151,153,13,100,0,0,22,0,192,0,-1--1--1,,1|(6481,3334)|
+1,152,153,150,4,0,0,22,0,192,0,-1--1--1,,1|(6627,3567)|
+11,153,0,6481,3567,6,8,34,3,0,2,1,0,0,0,0-0-0,0-0-0,|||0-0-0,0,0,0,0,0,0
+10,154,Retiro de promotores,6481,3601,66,26,40,3,0,34,-1,0,0,0,0-0-0,0-0-0,Vensim Sans ExtraBold|||0-0-0,0,0,0,0,0,0
+10,155,Normativa ambiental de ronda,1276,2290,90,26,8,3,0,34,-1,0,0,0,0-0-0,0-0-0,Vensim Sans ExtraBold|||0-0-0,0,0,0,0,0,0
+10,156,Participación comunitaria,5262,2407,81,26,8,3,0,34,-1,0,0,0,0-0-0,0-0-0,Vensim Sans ExtraBold|||0-0-0,0,0,0,0,0,0
+10,157,Frecuencia de acopio,2425,1706,66,26,8,3,0,34,-1,0,0,0,0-0-0,0-0-0,Vensim Sans ExtraBold|||0-0-0,0,0,0,0,0,0
+10,158,Frecuencia de recolección,1646,1689,81,26,8,3,0,34,-1,0,0,0,0-0-0,0-0-0,Vensim Sans ExtraBold|||0-0-0,0,0,0,0,0,0
+10,159,Demanda de tiendas y comedores,3841,1623,95,26,8,3,0,34,-1,0,0,0,0-0-0,0-0-0,Vensim Sans ExtraBold|||0-0-0,0,0,0,0,0,0
+10,160,Demanda de feria,3465,1429,101,16,8,3,0,34,-1,0,0,0,0-0-0,0-0-0,Vensim Sans ExtraBold|||0-0-0,0,0,0,0,0,0
+10,161,Fracción de cosecha destinada al autoconsumo,3423,2105,94,36,8,3,0,34,-1,0,0,0,0-0-0,0-0-0,Vensim Sans ExtraBold|||0-0-0,0,0,0,0,0,0
+10,162,Fracción de pérdidas en huerta,3365,2649,95,26,8,3,0,34,-1,0,0,0,0-0-0,0-0-0,Vensim Sans ExtraBold|||0-0-0,0,0,0,0,0,0
+10,163,Formadores de Bavaria,4983,3771,69,26,8,3,0,34,-1,0,0,0,0-0-0,0-0-0,Vensim Sans ExtraBold|||0-0-0,0,0,0,0,0,0
+10,164,Distrito biotecnológico activo,2939,2022,95,26,8,3,0,34,-1,0,0,0,0-0-0,0-0-0,Vensim Sans ExtraBold|||0-0-0,0,0,0,0,0,0
+10,165,Precio de venta local,4493,3096,69,26,8,3,0,34,-1,0,0,0,0-0-0,0-0-0,Vensim Sans ExtraBold|||0-0-0,0,0,0,0,0,0
+10,166,Precio de la proteína de hongos,4049,3179,98,26,8,3,0,34,-1,0,0,0,0-0-0,0-0-0,Vensim Sans ExtraBold|||0-0-0,0,0,0,0,0,0
+10,167,Fracción del gasto destinada a capacidad,1665,1179,86,36,8,3,0,34,-1,0,0,0,0-0-0,0-0-0,Vensim Sans ExtraBold|||0-0-0,0,0,0,0,0,0
+10,168,Residuos de hogares y comercios,1245,1729,98,26,8,3,0,34,-1,0,0,0,0-0-0,0-0-0,Vensim Sans ExtraBold|||0-0-0,0,0,0,0,0,0
+10,169,Fracción de cosecha destinada a la venta,3706,2071,86,36,8,3,0,34,-1,0,0,0,0-0-0,0-0-0,Vensim Sans ExtraBold|||0-0-0,0,0,0,0,0,0
+10,170,Fertilidad por huerta,1802,2842,69,26,8,3,0,34,-1,0,0,0,0-0-0,0-0-0,Vensim Sans ExtraBold|||0-0-0,0,0,0,0,0,0
+10,171,Conocimiento por huerta,5365,1809,75,26,8,3,0,34,-1,0,0,0,0-0-0,0-0-0,Vensim Sans ExtraBold|||0-0-0,0,0,0,0,0,0
+10,172,Participantes por huerta,5340,2004,78,26,8,3,0,34,-1,0,0,0,0-0-0,0-0-0,Vensim Sans ExtraBold|||0-0-0,0,0,0,0,0,0
+10,173,Factor de apoyo,4187,2423,95,16,8,3,0,34,-1,0,0,0,0-0-0,0-0-0,Vensim Sans ExtraBold|||0-0-0,0,0,0,0,0,0
+10,174,Efecto de la fertilidad,2597,2491,75,26,8,3,0,34,-1,0,0,0,0-0-0,0-0-0,Vensim Sans ExtraBold|||0-0-0,0,0,0,0,0,0
+10,175,Efecto del conocimiento en producción,2781,2610,80,36,8,3,0,34,-1,0,0,0,0-0-0,0-0-0,Vensim Sans ExtraBold|||0-0-0,0,0,0,0,0,0
+10,176,Freno por humedal,1365,2529,58,26,8,3,0,34,-1,0,0,0,0-0-0,0-0-0,Vensim Sans ExtraBold|||0-0-0,0,0,0,0,0,0
+10,177,Efecto del ingreso en la apertura,3115,2929,72,36,8,3,0,34,-1,0,0,0,0-0-0,0-0-0,Vensim Sans ExtraBold|||0-0-0,0,0,0,0,0,0
+10,178,Capacidad efectiva de reparto,2735,1509,93,26,8,3,0,34,-1,0,0,0,0-0-0,0-0-0,Vensim Sans ExtraBold|||0-0-0,0,0,0,0,0,0
+10,179,Compras al mayorista,3858,1971,66,26,8,3,0,34,-1,0,0,0,0-0-0,0-0-0,Vensim Sans ExtraBold|||0-0-0,0,0,0,0,0,0
+10,180,Dependencia del mayorista,4315,2129,81,26,8,3,0,34,-1,0,0,0,0-0-0,0-0-0,Vensim Sans ExtraBold|||0-0-0,0,0,0,0,0,0
+10,181,Disponibilidad de residuos orgánicos,1646,1835,78,36,8,3,0,34,-1,0,0,0,0-0-0,0-0-0,Vensim Sans ExtraBold|||0-0-0,0,0,0,0,0,0
+10,182,Candidatos disponibles,5502,3526,72,26,8,3,0,34,-1,0,0,0,0-0-0,0-0-0,Vensim Sans ExtraBold|||0-0-0,0,0,0,0,0,0
+10,183,Capacidad de formación,5286,3668,72,26,8,3,0,34,-1,0,0,0,0-0-0,0-0-0,Vensim Sans ExtraBold|||0-0-0,0,0,0,0,0,0
+10,184,Participantes objetivo,5562,2355,53,20,8,3,0,34,-1,0,0,0,0-0-0,0-0-0,Vensim Sans ExtraBold|||0-0-0,0,0,0,0,0,0
+10,185,Sobrecarga de participantes,6232,2462,87,26,8,3,0,34,-1,0,0,0,0-0-0,0-0-0,Vensim Sans ExtraBold|||0-0-0,0,0,0,0,0,0
+1,186,177,17,1,0,43,13,0,192,0,-1--1--1,,1|(2294,2828)|
+1,187,13,17,1,0,43,13,0,192,0,-1--1--1,,1|(2102,3153)|
+1,188,176,17,1,0,43,13,0,192,0,-1--1--1,,1|(1584,2387)|
+1,189,1,17,0,0,45,13,0,192,0,-1--1--1,,1|(0,0)|
+1,190,173,22,1,0,45,13,0,192,0,-1--1--1,,1|(3163,2812)|
+1,191,175,27,1,0,43,13,0,192,0,-1--1--1,,1|(2919,2412)|
+1,192,174,27,1,0,43,13,0,192,0,-1--1--1,,1|(2696,2335)|
+1,193,1,27,1,0,43,13,0,192,0,-1--1--1,,1|(2558,2247)|
+1,194,161,32,1,0,43,13,0,192,0,-1--1--1,,1|(3497,2175)|
+1,195,169,41,1,0,43,13,0,192,0,-1--1--1,,1|(3376,1946)|
+1,196,162,37,1,0,43,13,0,192,0,-1--1--1,,1|(3180,2603)|
+1,197,157,55,1,0,45,13,0,192,0,-1--1--1,,1|(2506,1829)|
+1,198,159,46,1,0,0,13,0,192,0,-1--1--1,,1|(3637,1687)|
+1,199,178,46,0,0,43,13,0,192,0,-1--1--1,,1|(0,0)|
+1,200,3,46,0,0,43,13,0,192,0,-1--1--1,,1|(0,0)|
+1,201,3,51,0,0,43,13,0,192,0,-1--1--1,,1|(0,0)|
+1,202,160,51,1,0,0,13,0,192,0,-1--1--1,,1|(3258,1450)|
+1,203,55,51,1,0,45,13,0,192,0,-1--1--1,,1|(2695,1687)|
+1,204,46,51,0,0,45,13,0,192,0,-1--1--1,,1|(0,0)|
+1,205,4,178,0,0,43,13,0,192,0,-1--1--1,,1|(0,0)|
+1,206,157,178,1,0,0,13,0,192,0,-1--1--1,,1|(2524,1558)|
+1,207,167,60,0,0,43,13,0,192,0,-1--1--1,,1|(0,0)|
+1,208,85,60,1,0,43,13,0,192,0,-1--1--1,,1|(4054,1652)|
+1,209,159,179,1,0,43,13,0,192,0,-1--1--1,,1|(3911,1794)|
+1,210,46,179,1,0,45,13,0,192,0,-1--1--1,,1|(3673,1934)|
+1,211,159,180,1,0,45,13,0,192,0,-1--1--1,,1|(4149,1815)|
+1,212,179,180,1,0,43,13,0,192,0,-1--1--1,,1|(4085,1979)|
+1,213,166,80,1,0,43,13,0,192,0,-1--1--1,,1|(4107,3040)|
+1,214,128,80,1,0,43,13,0,192,0,-1--1--1,,1|(4918,2279)|
+1,215,51,80,1,0,43,13,0,192,0,-1--1--1,,1|(4044,1987)|
+1,216,165,80,1,0,43,13,0,192,0,-1--1--1,,1|(4405,2957)|
+1,217,46,80,1,0,43,13,0,192,0,-1--1--1,,1|(4008,2294)|
+1,218,80,177,1,0,43,13,0,192,0,-1--1--1,,1|(3735,3003)|
+1,219,1,177,1,0,45,13,0,192,0,-1--1--1,,1|(2560,2788)|
+1,220,10,170,1,0,43,13,0,192,0,-1--1--1,,1|(1496,2575)|
+1,221,1,170,1,0,45,13,0,192,0,-1--1--1,,1|(1940,2654)|
+1,222,7,171,1,0,43,13,0,192,0,-1--1--1,,1|(7009,2517)|
+1,223,1,171,1,0,45,13,0,192,0,-1--1--1,,1|(4129,2784)|
+1,224,5,172,1,0,43,13,0,192,0,-1--1--1,,1|(5694,2018)|
+1,225,1,172,1,0,45,13,0,192,0,-1--1--1,,1|(4989,2326)|
+1,226,170,174,1,0,43,13,0,192,0,-1--1--1,,1|(2237,2747)|
+1,227,171,175,1,0,43,13,0,192,0,-1--1--1,,1|(4146,2707)|
+1,228,172,173,1,0,43,13,0,192,0,-1--1--1,,1|(4990,2238)|
+1,229,171,173,1,0,43,13,0,192,0,-1--1--1,,1|(4894,2168)|
+1,230,161,169,1,0,45,13,0,192,0,-1--1--1,,1|(3543,2042)|
+1,231,162,169,1,0,45,13,0,192,0,-1--1--1,,1|(3762,2417)|
+1,232,168,181,1,0,43,13,0,192,0,-1--1--1,,1|(1422,1838)|
+1,233,1,181,1,0,43,13,0,192,0,-1--1--1,,1|(1830,2189)|
+1,234,181,100,1,0,43,13,0,192,0,-1--1--1,,1|(1821,1848)|
+1,235,158,100,1,0,43,13,0,192,0,-1--1--1,,1|(1896,1796)|
+1,236,164,118,1,0,43,13,0,192,0,-1--1--1,,1|(2781,2045)|
+1,237,118,123,1,0,43,13,0,192,0,-1--1--1,,1|(3912,2083)|
+1,238,133,128,0,0,45,13,0,192,0,-1--1--1,,1|(0,0)|
+1,239,1,138,1,0,43,13,0,192,0,-1--1--1,,1|(838,2469)|
+1,240,155,143,1,0,43,13,0,192,0,-1--1--1,,1|(1200,2194)|
+1,241,12,143,0,0,43,13,0,192,0,-1--1--1,,1|(0,0)|
+1,242,155,176,1,0,45,13,0,192,0,-1--1--1,,1|(1246,2413)|
+1,243,12,176,1,0,45,13,0,192,0,-1--1--1,,1|(1043,2414)|
+1,244,163,183,1,0,43,13,0,192,0,-1--1--1,,1|(5146,3813)|
+1,245,13,182,1,0,45,13,0,192,0,-1--1--1,,1|(5789,3502)|
+1,246,5,182,1,0,43,13,0,192,0,-1--1--1,,1|(5441,2846)|
+1,247,183,148,1,0,43,13,0,192,0,-1--1--1,,1|(5399,3375)|
+1,248,182,148,1,0,43,13,0,192,0,-1--1--1,,1|(5502,3372)|
+1,249,13,95,1,0,43,13,0,192,0,-1--1--1,,1|(6281,3643)|
+1,250,5,95,1,0,43,13,0,192,0,-1--1--1,,1|(6444,2888)|
+1,251,1,184,1,0,43,13,0,192,0,-1--1--1,,1|(5254,2958)|
+1,252,156,70,1,0,43,13,0,192,0,-1--1--1,,1|(5384,2271)|
+1,253,184,70,1,0,43,13,0,192,0,-1--1--1,,1|(5654,2272)|
+1,254,5,185,1,0,0,13,0,192,0,-1--1--1,,1|(6094,2374)|
+1,255,1,185,1,0,0,13,0,192,0,-1--1--1,,1|(2790,3055)|
+1,256,185,75,1,0,43,13,0,192,0,-1--1--1,,1|(6265,2315)|
+10,257,Aperturas espontáneas,2022,2516,80,27,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,258,257,18,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+10,259,Huertas nuevas por promotor,1838,2556,96,27,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,260,259,18,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+10,261,Huertas potenciales,1692,2526,72,27,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,262,261,18,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+10,263,Tasa base de cierre,2185,2686,84,27,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,264,263,23,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+10,265,Rendimiento por huerta,2835,2345,79,27,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,266,265,28,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+10,267,Tiempo de salida de la cosecha,3491,2325,104,27,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,268,267,33,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+10,269,Tiempo de salida de la cosecha,3277,2561,104,27,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,270,269,38,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+10,271,Tiempo de salida de la cosecha,3211,2082,104,27,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,272,271,42,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+10,273,TIME STEP,3377,1851,61,40,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,274,273,47,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+10,275,TIME STEP,3188,1630,41,27,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,276,275,52,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+10,277,Frecuencia de acopio de referencia,2423,1935,74,25,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,278,277,56,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+10,279,Tasa base de merma,2898,1895,84,27,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,280,279,56,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+10,281,Costo de ampliar capacidad,2062,1435,103,27,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,282,281,61,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+10,283,Tasa de desgaste del equipamiento,2736,1414,108,27,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,284,283,66,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+10,285,Tiempo de incorporación,5596,2286,83,27,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,286,285,71,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+10,287,Tasa base de desgaste de participantes,6460,2352,84,40,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,288,287,76,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+10,289,Tiempo de ejecución del gasto,5004,3024,75,40,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,290,289,86,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+10,291,Tasa de olvido,6831,4075,53,27,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,292,291,91,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+10,293,Conocimiento generado por promotor,6605,3804,84,29,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,294,293,96,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+10,295,Intercambio entre pares,6732,3639,73,27,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,296,295,96,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+10,297,Frecuencia de media saturación de la recolección,1901,2073,125,40,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,298,297,101,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+10,299,Tiempo de maduración,2290,2142,74,27,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,300,299,105,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+10,301,Tiempo de entrega de compost,1882,2342,67,40,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,302,301,109,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+10,303,Tiempo de agotamiento del suelo,1498,2333,91,40,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,304,303,114,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+10,305,Fracción de orgánicos para sustrato,2667,2104,84,40,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,306,305,119,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+10,307,Tiempo de entrega de sustrato,2472,2111,67,40,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,308,307,119,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+10,309,Rendimiento de hongos por kg de sustrato,4544,1890,99,40,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,310,309,124,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+10,311,Demanda de proteína de hongos,5099,1643,117,27,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,312,311,129,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+10,313,TIME STEP,5321,1670,41,27,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,314,313,129,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+10,315,Tasa de pérdida de hongos,4924,2019,99,27,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,316,315,134,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+10,317,Fracción de huertas en el borde,545,2181,74,40,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,318,317,139,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+10,319,Presión por huerta de borde,545,2181,98,27,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,320,319,139,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+10,321,Tasa de recuperación natural,1271,2187,73,40,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,322,321,144,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+10,323,Tiempo de formación de promotores,5725,3401,73,40,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,324,323,149,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+10,325,Tasa de retiro de promotores,6373,3469,103,27,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,326,325,154,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+10,327,Conocimiento de referencia por huerta,4232,2579,125,27,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,328,327,173,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+10,329,Participantes de referencia por huerta,4478,2546,125,27,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,330,329,173,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+10,331,Efecto mínimo de la fertilidad,2814,2458,88,27,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,332,331,174,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+10,333,Fertilidad de referencia por huerta,2765,2535,78,40,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,334,333,174,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+10,335,Aumento máximo de rendimiento por conocimiento,2986,2573,97,46,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,336,335,175,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+10,337,Conocimiento de referencia por huerta,2644,2749,92,30,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,338,337,175,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+10,339,Presión crítica del humedal,1365,2582,87,27,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,340,339,176,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+10,341,Ingreso de referencia por huerta,3237,3053,78,40,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,342,341,177,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+10,343,Sensibilidad de la apertura al ingreso,2972,3066,114,27,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,344,343,177,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+10,345,Frecuencia de acopio de referencia,2735,1562,121,27,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,346,345,178,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+10,347,Residuo propio por huerta,1646,1898,93,27,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,348,347,181,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+10,349,Fracción de participantes que pueden ser promotores,5537,3643,139,40,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,350,349,182,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+10,351,Promotores formados por formador,5335,3827,75,40,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,352,351,183,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+10,353,Participantes objetivo por huerta,5407,2497,112,27,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,354,353,184,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+10,355,Carga tolerable por participante,6365,2532,95,27,8,2,0,3,-1,0,0,0,128-128-128,0-0-0,|||128-128-128,0,0,0,0,0,0
+1,356,355,185,0,0,0,0,0,64,0,-1--1--1,,1|(0,0)|
+1,357,2,42,0,1,0,0,0,64,0,-1--1--1,,1|(0,0)|
+///---\\\
+:L<%^E!@
+5:Fracción de participantes que pueden ser promotores
+19:28,0
+24:0
+25:0
+26:0
+23:0
+15:0,0,0,0,0,0
+27:0,
+34:0,
+42:0
+72:0
+73:0
+95:0
+96:0
+97:0
+77:0
+78:0
+102:1
+93:0
+94:0
+92:0
+91:0
+90:0
+87:0
+75:
+43:
+103:8,8,8,3,8
+105:0,0,0,0,0,0,0,0,0,0
+104:Vensim Sans|12||0-0-0|0-0-0|-1--1--1|0-0-255|192-192-192|-1--1--1

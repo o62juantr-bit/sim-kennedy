@@ -1,0 +1,521 @@
+{UTF-8}
+Mejora de calidad del parche  = A FUNCTION OF( Calidad objetivo del parche,Tiempo de ajuste de calidad\
+		) ~~|
+Mejora de calidad del parche = MAX(0,Calidad objetivo del parche-Calidad de parche)/Tiempo de ajuste de calidad
+	~	1/Month
+	~	Flujo. Ajuste hacia la calidad objetivo.
+	|
+
+Presion sobre el humedal  = A FUNCTION OF( Presion generada por el borde) ~~|
+Presion sobre el humedal = INTEG(Presion generada por el borde - FLO16 Recuperacion del humedal\
+		, 0.4)
+	~	Dmnl
+	~	Stock. Indice 0 a 1. Grafica G14. Bucle B3. Valor inicial 0,4 (S).
+	|
+
+Calidad de parche  = A FUNCTION OF( Mejora de calidad del parche) ~~|
+Calidad de parche = INTEG(Mejora de calidad del parche - Deterioro de calidad del parche\
+		, 0.6)
+	~	Dmnl
+	~	Stock. Recursos menos amenazas, promedio de parches.
+	|
+
+Ocupacion de parches por la especie clave  = A FUNCTION OF( Colonizacion de parches) ~~|
+Ocupacion de parches por la especie clave = INTEG(Colonizacion de parches - Extincion local\
+		, 0.5)
+	~	Dmnl
+	~	Stock. Fraccion p de parches ocupados (modelo de Levins). Individuos = p x \
+		parches x aves por parche. Grafica G13.
+	|
+
+Mortalidad acumulada por trampas = INTEG(Muertes por trampas, 0)
+	~	individuo
+	~	Stock. Vidrio, luz y manejo de granos.
+	|
+
+Actividad en el borde = Huertas en el borde*Intensidad de uso por huerta*Norma de ronda efectiva
+	~	hora/Month
+	~	Auxiliar. Huertas E04 x intensidad de uso x norma efectiva. Se dibuja como \
+		auxiliar; el flujo al stock es FLI17.
+	|
+
+Presion generada por el borde = ka Presion por hora persona*Actividad en el borde
+	~	1/Month
+	~	Flujo. ka x FLI09.
+	|
+
+Recuperacion del humedal = Presion sobre el humedal*kr Tasa de recuperacion del humedal
+	~	1/Month
+	~	Flujo. STK10 x tasa de recuperacion.
+	|
+
+Colonizacion de parches = c Tasa de colonizacion*Ocupacion de parches por la especie clave\
+		*(1-Ocupacion de parches por la especie clave)
+	~	1/Month
+	~	Flujo. c x p x (1 - p), c = c0 x exp(-d/alfa).
+	|
+
+Extincion local = e Tasa de extincion*Ocupacion de parches por la especie clave
+	~	1/Month
+	~	Flujo. e0 x (1 + efecto trampa) x p.
+	|
+
+Deterioro de calidad del parche = MAX(0,Calidad de parche-Calidad objetivo del parche\
+		)/Tiempo de ajuste de calidad
+	~	1/Month
+	~	Flujo.
+	|
+
+Muertes por trampas = Individuos de la especie clave*Mortalidad total por trampas/12
+	~	individuo/Month
+	~	Flujo. Individuos x mortalidad anual / 12.
+	|
+
+Norma de ronda efectiva = Norma ambiental de ronda*(1-MIN(1,MAX(0,Presion sobre el humedal\
+		-Umbral de presion)/(1-Umbral de presion)))
+	~	Dmnl
+	~	Auxiliar. Cierra B3: mas presion, mas restricciones, menos uso del borde.
+	|
+
+Numero de parches = Parches naturales+Numero de huertas
+	~	parche
+	~	Auxiliar. Humedales El Burro, La Vaca y Techo mas huertas.
+	|
+
+Distancia efectiva entre parches = d Distancia base entre parches*(1-0.4*Corredores entre parches\
+		)/(1+0.03*Numero de huertas)
+	~	m
+	~	Auxiliar. Los corredores y mas huertas acortan la distancia.
+	|
+
+c Tasa de colonizacion = c0 Colonizacion base*EXP(-Distancia efectiva entre parches/alfa Alcance de dispersion\
+		)
+	~	1/Month
+	~	Auxiliar.
+	|
+
+e Tasa de extincion = e0 Extincion base*(1+Efecto de trampa)
+	~	1/Month
+	~	Auxiliar.
+	|
+
+Efecto de trampa = MIN(2,Riesgo de trampa ecologica*Factor de escala de trampa)
+	~	Dmnl
+	~	Auxiliar.
+	|
+
+m vidrio = Intensidad de vidrio*Coeficiente de mortalidad por vidrio*(1-Efectividad de la medida antitrampa\
+		*Medida antitrampa)
+	~	1/Year
+	~	Auxiliar. Mortalidad por vidrio.
+	|
+
+m luz = Intensidad de luz nocturna*Coeficiente de mortalidad por luz*(1-Efectividad de la medida antitrampa\
+		*Medida antitrampa)
+	~	1/Year
+	~	Auxiliar. Mortalidad por luz nocturna.
+	|
+
+m grano = Granos expuestos*Coeficiente de mortalidad por granos*(1-Efectividad de la medida antitrampa\
+		*Medida antitrampa)*MIN(1,Numero de huertas)
+	~	1/Year
+	~	Auxiliar. Mortalidad por granos expuestos en huertas.
+	|
+
+Mortalidad total por trampas = m vidrio+m luz+m grano
+	~	1/Year
+	~	Auxiliar. Grafica G16.
+	|
+
+Recursos del parche = 0.3+0.4*Densidad de arboles+0.1*MIN(1,Numero de huertas/10)
+	~	Dmnl
+	~	Auxiliar.
+	|
+
+Calidad objetivo del parche = MAX(0,MIN(1,Recursos del parche-2*Mortalidad total por trampas\
+		-0.3*Presion sobre el humedal))
+	~	Dmnl
+	~	Auxiliar. Recursos menos amenazas.
+	|
+
+Individuos de la especie clave = Ocupacion de parches por la especie clave*Numero de parches\
+		*Aves por parche
+	~	individuo
+	~	Auxiliar.
+	|
+
+Conectividad = 1/(1+(Distancia efectiva entre parches/alfa Alcance de dispersion)^4)
+	~	Dmnl
+	~	Auxiliar. Grafica G15. Aproximacion agregada de parches con vecino a menos \
+		de alfa.
+	|
+
+Riesgo de trampa ecologica = Calidad de parche*Mortalidad total por trampas
+	~	Dmnl
+	~	Auxiliar. Grafica G16. Calidad atractiva x mortalidad.
+	|
+
+Ocupacion de equilibrio = MAX(0,1-e Tasa de extincion/c Tasa de colonizacion)
+	~	Dmnl
+	~	Reportero de grafica. Grafica G13. p* = max(0, 1 - e/c).
+	|
+
+Equilibrio de presion = ka Presion por hora persona*Actividad en el borde/kr Tasa de recuperacion del humedal
+	~	Dmnl
+	~	Reportero de grafica. Grafica G14.
+	|
+
+Horas persona admisibles = Umbral de presion*kr Tasa de recuperacion del humedal/ka Presion por hora persona
+	~	hora/Month
+	~	Reportero de grafica. Grafica G14. Con los valores de ejemplo, 80 horas al \
+		mes.
+	|
+
+Escenario S3 = 2
+	~	Dmnl
+	~	Parametro o constante. 1 = sin huertas, 2 = huertas sin criterio de \
+		ubicacion, 3 = huertas con corredores.
+	|
+
+Medida antitrampa = 0
+	~	Dmnl
+	~	Parametro o constante. 0 = no, 1 = si (cintas en vidrios, apagar luz, \
+		manejo de granos).
+	|
+
+Numero de huertas = IF THEN ELSE(Escenario S3=1,0,12)
+	~	Dmnl
+	~	Parametro o constante. S.
+	|
+
+Huertas en el borde = IF THEN ELSE(Escenario S3=1,0,IF THEN ELSE(Escenario S3=2,12,4)\
+		)
+	~	Dmnl
+	~	Parametro o constante. S.
+	|
+
+Corredores entre parches = IF THEN ELSE(Escenario S3=3,1,0)
+	~	Dmnl
+	~	Parametro o constante.
+	|
+
+Intensidad de uso por huerta = 10
+	~	hora/Month
+	~	Parametro o constante. Por estimar.
+	|
+
+Norma ambiental de ronda = 1
+	~	Dmnl
+	~	Parametro o constante. 1 = permite cultivar en E04, 0 = no. Por verificar.
+	|
+
+ka Presion por hora persona = 0.0005
+	~	1/hora
+	~	Parametro o constante. Por estimar.
+	|
+
+kr Tasa de recuperacion del humedal = 0.1
+	~	1/Month
+	~	Parametro o constante. Por estimar.
+	|
+
+Umbral de presion = 0.4
+	~	Dmnl
+	~	Parametro o constante.
+	|
+
+Densidad de arboles = 0.5
+	~	Dmnl
+	~	Parametro o constante. Slider.
+	|
+
+Intensidad de vidrio = 0.3
+	~	Dmnl
+	~	Parametro o constante. Slider. Por edificio.
+	|
+
+Intensidad de luz nocturna = 0.3
+	~	Dmnl
+	~	Parametro o constante. Slider.
+	|
+
+Granos expuestos = 0.3
+	~	Dmnl
+	~	Parametro o constante. Slider.
+	|
+
+Coeficiente de mortalidad por vidrio = 0.1
+	~	1/Year
+	~	Parametro o constante. S.
+	|
+
+Coeficiente de mortalidad por luz = 0.08
+	~	1/Year
+	~	Parametro o constante. S.
+	|
+
+Coeficiente de mortalidad por granos = 0.1
+	~	1/Year
+	~	Parametro o constante. S.
+	|
+
+Efectividad de la medida antitrampa = 0.8
+	~	Dmnl
+	~	Parametro o constante. S.
+	|
+
+alfa Alcance de dispersion = 500
+	~	m
+	~	Parametro o constante. Por especie. Validar con especialista.
+	|
+
+d Distancia base entre parches = 500
+	~	m
+	~	Parametro o constante. Medir en el mapa.
+	|
+
+c0 Colonizacion base = 0.4/12
+	~	1/Month
+	~	Parametro o constante. 0,4 por anio (S).
+	|
+
+e0 Extincion base = 0.1/12
+	~	1/Month
+	~	Parametro o constante. 0,1 por anio (S).
+	|
+
+Aves por parche = 4
+	~	individuo
+	~	Parametro o constante. S.
+	|
+
+Parches naturales = 3
+	~	parche
+	~	Parametro o constante. Humedales El Burro, La Vaca y Techo.
+	|
+
+Tiempo de ajuste de calidad = 6
+	~	Month
+	~	Parametro o constante. S.
+	|
+
+Factor de escala de trampa = 10
+	~	Dmnl
+	~	Parametro o constante. S.
+	|
+
+********************************************************
+	.Control
+********************************************************~
+		Simulation Control Parameters
+	|
+
+FINAL TIME  = 120
+	~	Month
+	~	The final time for the simulation.
+	|
+
+INITIAL TIME  = 0
+	~	Month
+	~	The initial time for the simulation.
+	|
+
+SAVEPER  = 
+        TIME STEP
+	~	Month [0,?]
+	~	The frequency with which output is stored.
+	|
+
+TIME STEP  = 0.25
+	~	Month [0,?]
+	~	The time step for the simulation.
+	|
+
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*S3 Habitat y fauna
+$192-192-192,0,Times New Roman|10||0-0-0|0-0-0|0-0-255|-1--1--1|-1--1--1|96,96,60,0
+10,1,Presion sobre el humedal,1448,960,45,18,3,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,2,Ocupacion de parches por la especie clave,2094,962,62,26,3,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,3,Calidad de parche,1461,1297,43,20,3,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,4,Mortalidad acumulada por trampas,2141,1292,58,16,3,3,0,0,0,0,0,0,0,0,0,0,0,0
+11,5,0,1343,964,6,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,6,Presion generada por el borde,1343,990,46,18,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+11,7,0,1582,967,6,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,8,Recuperacion del humedal,1582,993,42,18,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+11,9,0,1941,966,6,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,10,Colonizacion de parches,1941,996,40,22,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+11,11,0,2240,959,6,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,12,Extincion local,2240,975,75,8,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+11,13,0,1308,1298,6,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,14,Mejora de calidad del parche,1308,1340,47,34,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+11,15,0,1594,1300,6,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,16,Deterioro de calidad del parche,1594,1336,50,28,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+11,17,0,1968,1296,6,8,34,3,0,0,1,0,0,0,0,0,0,0,0,0
+10,18,Muertes por trampas,1968,1328,43,24,40,3,0,0,-1,0,0,0,0,0,0,0,0,0
+12,19,48,1210,962,10,8,0,3,0,0,0,0,0,0,0,0,0,0,0,0
+12,20,48,1690,967,10,8,0,3,0,0,0,0,0,0,0,0,0,0,0,0
+12,21,48,1850,962,10,8,0,3,0,0,0,0,0,0,0,0,0,0,0,0
+12,22,48,2330,959,10,8,0,3,0,0,0,0,0,0,0,0,0,0,0,0
+12,23,48,1210,1292,10,8,0,3,0,0,0,0,0,0,0,0,0,0,0,0
+12,24,48,1690,1300,10,8,0,3,0,0,0,0,0,0,0,0,0,0,0,0
+12,25,48,1850,1292,10,8,0,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,26,Actividad en el borde,1203,467,34,16,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,27,Norma de ronda efectiva,1459,885,81,8,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,28,Numero de parches,2540,1123,39,28,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,29,Distancia efectiva entre parches,2287,415,51,20,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,30,c Tasa de colonizacion,2403,707,44,22,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,31,e Tasa de extincion,2662,1263,68,8,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,32,Efecto de trampa,2227,1492,59,8,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,33,m vidrio,1859,1576,33,8,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,34,m luz,1685,1602,24,8,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,35,m grano,1957,1553,30,8,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,36,Mortalidad total por trampas,1808,1464,48,25,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,37,Recursos del parche,1830,786,68,8,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,38,Calidad objetivo del parche,1629,1131,45,20,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,39,Individuos de la especie clave,2315,1243,52,22,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,40,Conectividad,2474,377,65,8,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,41,Riesgo de trampa ecologica,1870,1346,55,24,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,42,Ocupacion de equilibrio,2692,968,52,24,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,43,Equilibrio de presion,1574,651,39,23,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,44,Horas persona admisibles,1270,701,54,19,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,45,Escenario S3,1779,627,46,8,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,46,Medida antitrampa,1769,1635,39,20,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,47,Numero de huertas,2289,793,39,20,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,48,Huertas en el borde,1361,369,33,26,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,49,Corredores entre parches,2053,519,40,31,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,50,Intensidad de uso por huerta,1034,464,46,26,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,51,Norma ambiental de ronda,1538,801,48,29,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,52,ka Presion por hora persona,1124,657,46,26,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,53,kr Tasa de recuperacion del humedal,1657,766,62,25,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,54,Umbral de presion,1370,770,62,8,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,55,Densidad de arboles,1708,887,44,24,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,56,Intensidad de vidrio,1819,1725,28,24,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,57,Intensidad de luz nocturna,1506,1558,36,19,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,58,Granos expuestos,2050,1745,59,8,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,59,Coeficiente de mortalidad por vidrio,1874,1804,59,27,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,60,Coeficiente de mortalidad por luz,1548,1689,60,25,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,61,Coeficiente de mortalidad por granos,1967,1641,55,26,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,62,Efectividad de la medida antitrampa,1731,1835,55,42,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,63,alfa Alcance de dispersion,2445,557,37,16,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,64,d Distancia base entre parches,2164,177,49,30,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,65,c0 Colonizacion base,2522,640,49,27,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,66,e0 Extincion base,2654,1466,62,8,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,67,Aves por parche,2396,1382,56,8,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,68,Parches naturales,2497,1245,62,8,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,69,Tiempo de ajuste de calidad,1374,1137,49,25,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+10,70,Factor de escala de trampa,2194,1578,43,20,8,3,0,0,0,0,0,0,0,0,0,0,0,0
+1,71,5,1,4,0,0,22,0,0,0,-1--1--1,,1|(1376,964)|
+1,72,19,5,100,0,0,22,0,0,0,-1--1--1,,1|(1279,964)|
+1,73,7,20,4,0,0,22,0,0,0,-1--1--1,,1|(1634,967)|
+1,74,1,7,100,0,0,22,0,0,0,-1--1--1,,1|(1535,967)|
+1,75,9,2,4,0,0,22,0,0,0,-1--1--1,,1|(1989,966)|
+1,76,21,9,100,0,0,22,0,0,0,-1--1--1,,1|(1898,966)|
+1,77,11,22,4,0,0,22,0,0,0,-1--1--1,,1|(2283,959)|
+1,78,2,11,100,0,0,22,0,0,0,-1--1--1,,1|(2195,959)|
+1,79,13,3,4,0,0,22,0,0,0,-1--1--1,,1|(1366,1298)|
+1,80,23,13,100,0,0,22,0,0,0,-1--1--1,,1|(1261,1298)|
+1,81,15,24,4,0,0,22,0,0,0,-1--1--1,,1|(1640,1300)|
+1,82,3,15,100,0,0,22,0,0,0,-1--1--1,,1|(1546,1300)|
+1,83,17,4,4,0,0,22,0,0,0,-1--1--1,,1|(2028,1296)|
+1,84,25,17,100,0,0,22,0,0,0,-1--1--1,,1|(1911,1296)|
+1,85,48,26,1,0,43,0,0,192,0,-1--1--1,,1|(1258,378)|
+1,86,50,26,1,0,43,0,0,192,0,-1--1--1,,1|(1119,436)|
+1,87,27,26,1,0,43,0,0,192,0,-1--1--1,,1|(1394,657)|
+1,88,26,5,1,0,43,0,0,192,0,-1--1--1,,1|(1073,703)|
+1,89,52,5,1,0,43,0,0,192,0,-1--1--1,,1|(1199,849)|
+1,90,53,7,1,0,43,0,0,192,0,-1--1--1,,1|(1656,879)|
+1,91,30,9,1,0,43,0,0,192,0,-1--1--1,,1|(2129,759)|
+1,92,2,9,0,0,43,0,0,192,0,-1--1--1,,1|(0,0)|
+1,93,31,11,1,0,43,0,0,192,0,-1--1--1,,1|(2501,987)|
+1,94,38,13,1,0,43,0,0,192,0,-1--1--1,,1|(1394,1183)|
+1,95,69,13,1,0,45,0,0,192,0,-1--1--1,,1|(1271,1211)|
+1,96,38,15,1,0,45,0,0,192,0,-1--1--1,,1|(1645,1224)|
+1,97,69,15,1,0,45,0,0,192,0,-1--1--1,,1|(1575,1199)|
+1,98,39,17,1,0,43,0,0,192,0,-1--1--1,,1|(2117,1222)|
+1,99,36,17,1,0,43,0,0,192,0,-1--1--1,,1|(1912,1411)|
+1,100,51,27,1,0,43,0,0,192,0,-1--1--1,,1|(1518,865)|
+1,101,1,27,1,0,45,0,0,192,0,-1--1--1,,1|(1478,927)|
+1,102,54,27,1,0,43,0,0,192,0,-1--1--1,,1|(1373,841)|
+1,103,47,28,1,0,43,0,0,192,0,-1--1--1,,1|(2441,925)|
+1,104,68,28,1,0,43,0,0,192,0,-1--1--1,,1|(2556,1211)|
+1,105,49,29,1,0,45,0,0,192,0,-1--1--1,,1|(2145,431)|
+1,106,64,29,1,0,43,0,0,192,0,-1--1--1,,1|(2170,314)|
+1,107,47,29,1,0,45,0,0,192,0,-1--1--1,,1|(2210,592)|
+1,108,63,30,1,0,43,0,0,192,0,-1--1--1,,1|(2402,611)|
+1,109,65,30,1,0,43,0,0,192,0,-1--1--1,,1|(2480,694)|
+1,110,29,30,1,0,45,0,0,192,0,-1--1--1,,1|(2278,587)|
+1,111,66,31,1,0,43,0,0,192,0,-1--1--1,,1|(2712,1366)|
+1,112,32,31,1,0,43,0,0,192,0,-1--1--1,,1|(2510,1440)|
+1,113,41,32,1,0,43,0,0,192,0,-1--1--1,,1|(2024,1457)|
+1,114,70,32,1,0,43,0,0,192,0,-1--1--1,,1|(2232,1544)|
+1,115,59,33,1,0,43,0,0,192,0,-1--1--1,,1|(1902,1682)|
+1,116,62,33,1,0,45,0,0,192,0,-1--1--1,,1|(1773,1695)|
+1,117,56,33,1,0,43,0,0,192,0,-1--1--1,,1|(1863,1666)|
+1,118,46,33,1,0,45,0,0,192,0,-1--1--1,,1|(1808,1587)|
+1,119,60,34,0,0,43,0,0,192,0,-1--1--1,,1|(0,0)|
+1,120,62,34,1,0,45,0,0,192,0,-1--1--1,,1|(1681,1737)|
+1,121,57,34,1,0,43,0,0,192,0,-1--1--1,,1|(1620,1543)|
+1,122,46,34,1,0,45,0,0,192,0,-1--1--1,,1|(1732,1593)|
+1,123,61,35,1,0,43,0,0,192,0,-1--1--1,,1|(1977,1595)|
+1,124,62,35,1,0,45,0,0,192,0,-1--1--1,,1|(2076,1822)|
+1,125,58,35,1,0,43,0,0,192,0,-1--1--1,,1|(2036,1654)|
+1,126,46,35,1,0,45,0,0,192,0,-1--1--1,,1|(1888,1628)|
+1,127,47,35,1,0,43,0,0,192,0,-1--1--1,,1|(2390,1231)|
+1,128,35,36,1,0,43,0,0,192,0,-1--1--1,,1|(1890,1487)|
+1,129,34,36,1,0,43,0,0,192,0,-1--1--1,,1|(1722,1522)|
+1,130,33,36,1,0,43,0,0,192,0,-1--1--1,,1|(1812,1542)|
+1,131,55,37,1,0,43,0,0,192,0,-1--1--1,,1|(1751,818)|
+1,132,47,37,1,0,43,0,0,192,0,-1--1--1,,1|(2090,872)|
+1,133,36,38,1,0,45,0,0,192,0,-1--1--1,,1|(1766,1281)|
+1,134,37,38,1,0,43,0,0,192,0,-1--1--1,,1|(1816,958)|
+1,135,1,38,1,0,45,0,0,192,0,-1--1--1,,1|(1504,1054)|
+1,136,67,39,1,0,43,0,0,192,0,-1--1--1,,1|(2395,1314)|
+1,137,28,39,1,0,43,0,0,192,0,-1--1--1,,1|(2464,1212)|
+1,138,2,39,1,0,43,0,0,192,0,-1--1--1,,1|(2248,1081)|
+1,139,63,40,1,0,43,0,0,192,0,-1--1--1,,1|(2505,472)|
+1,140,29,40,1,0,45,0,0,192,0,-1--1--1,,1|(2379,360)|
+1,141,36,41,1,0,43,0,0,192,0,-1--1--1,,1|(1848,1435)|
+1,142,3,41,1,0,43,0,0,192,0,-1--1--1,,1|(1640,1378)|
+1,143,30,42,1,0,43,0,0,192,0,-1--1--1,,1|(2592,782)|
+1,144,31,42,1,0,45,0,0,192,0,-1--1--1,,1|(2722,1128)|
+1,145,26,43,1,0,43,0,0,192,0,-1--1--1,,1|(1464,502)|
+1,146,52,43,1,0,43,0,0,192,0,-1--1--1,,1|(1337,551)|
+1,147,53,43,1,0,45,0,0,192,0,-1--1--1,,1|(1636,692)|
+1,148,52,44,1,0,45,0,0,192,0,-1--1--1,,1|(1220,649)|
+1,149,53,44,1,0,43,0,0,192,0,-1--1--1,,1|(1491,685)|
+1,150,54,44,1,0,43,0,0,192,0,-1--1--1,,1|(1311,761)|
+1,151,45,47,1,0,43,0,0,192,0,-1--1--1,,1|(1976,767)|
+1,152,45,48,1,0,0,0,0,192,0,-1--1--1,,1|(1670,441)|
+1,153,45,49,1,0,43,0,0,192,0,-1--1--1,,1|(1945,630)|
+///---\\\
+:L<%^E!@
+5:Granos expuestos
+19:60,0
+24:0
+25:0
+26:0
+23:0
+15:0,0,0,0,0,0
+27:0,
+34:0,
+42:0
+72:0
+73:0
+95:0
+96:0
+97:0
+77:0
+78:0
+102:1
+93:0
+94:0
+92:0
+91:0
+90:0
+87:0
+75:
+43:
+103:8,8,8,3,8
+105:0,0,0,0,0,0,0,0,0,0
+104:Vensim Sans|12||0-0-0|0-0-0|-1--1--1|0-0-255|192-192-192|-1--1--1
