@@ -101,6 +101,12 @@ export class SimulationEngine {
     if (this.customParams.capacidad_acopio_kg_sem !== undefined) {
       this.modulos.sim1.estado.capacidadAcopioKg = this.customParams.capacidad_acopio_kg_sem;
     }
+    if (this.customParams.cupos_taller_mes !== undefined) {
+      this.modulos.sim2.params.cupos_taller_mes = this.customParams.cupos_taller_mes;
+    }
+    if (this.customParams.ratio_saturacion_critico !== undefined) {
+      this.modulos.sim2.params.ratio_saturacion_critico = this.customParams.ratio_saturacion_critico;
+    }
     if (this.customParams.fraccion_desvio_compost_e10 !== undefined) {
       this.modulos.sim3.params.fraccion_desvio_compost_e10 = this.customParams.fraccion_desvio_compost_e10;
     }
@@ -118,10 +124,11 @@ export class SimulationEngine {
     const resSim2 = this.modulos.sim2.step(this.clock, this.rng);
 
     // 2. Ejecutar Simulación 1 (Abastecimiento y Proveedor con balance de masa)
-    // Sincronizar número de huertas activas con la difusión de conocimiento
-    this.modulos.sim1.huertas.E01.n = Math.round(resSim2.huertas_activas * 0.40);
+    // Sincronizar número de huertas activas en las 4 tipologías
+    this.modulos.sim1.huertas.E01.n = Math.round(resSim2.huertas_activas * 0.35);
     this.modulos.sim1.huertas.E02.n = Math.round(resSim2.huertas_activas * 0.30);
-    this.modulos.sim1.huertas.E04.n = Math.round(resSim2.huertas_activas * 0.15);
+    this.modulos.sim1.huertas.E03.n = Math.round(resSim2.huertas_activas * 0.15);
+    this.modulos.sim1.huertas.E04.n = Math.round(resSim2.huertas_activas * 0.20);
     const resSim1 = this.modulos.sim1.step(this.clock, this.rng, this.massTracker, this.stressScenario);
 
     // 3. Ejecutar Simulación 3 (Orgánicos y Compostaje con balance de masa)

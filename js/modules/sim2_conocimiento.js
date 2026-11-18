@@ -47,11 +47,14 @@ export class Sim2Conocimiento {
     // Cada mes (4 semanas) egresan nuevos promotores si hay cupo y formadores disponibles
     const esFinDeMes = sem % 4 === 0;
     if (esFinDeMes && p.facilitadores_bavaria > 0) {
-      const formadosMes = Math.floor(rng.range(2, Math.min(6, p.cupos_taller_mes / 4)));
+      const maxFormados = Math.max(2, Math.round(p.cupos_taller_mes / 4));
+      const formadosMes = Math.floor(rng.range(2, maxFormados + 1));
       this.estado.promotoresActivos += formadosMes;
       // Desgaste o retiro de promotores por sobrecarga (bucle B1)
       if (this.estado.saturacionAcompanamiento > p.ratio_saturacion_critico) {
-        const bajasPromotores = Math.floor(this.estado.promotoresActivos * 0.08);
+        const sobrecarga = (this.estado.saturacionAcompanamiento - p.ratio_saturacion_critico) / p.ratio_saturacion_critico;
+        const tasaBaja = Math.min(0.25, 0.05 + sobrecarga * 0.10);
+        const bajasPromotores = Math.max(1, Math.floor(this.estado.promotoresActivos * tasaBaja));
         this.estado.promotoresActivos = Math.max(2, this.estado.promotoresActivos - bajasPromotores);
       }
     }
