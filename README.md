@@ -9,13 +9,12 @@ Desarrollado para el curso de **Modelamiento Dinámico y Simulación** (Pontific
 ## 1. Contexto y Objetivos del Proyecto
 
 ### 1.0 Acceso Rápido y Modelos Vensim
-- 🌐 **Simulador Territorial en Línea:** [https://o62juantr-bit.github.io/sim-kennedy/](https://o62juantr-bit.github.io/sim-kennedy/)
-- 📊 **Visor Interactivo de Modelos Vensim:** [https://o62juantr-bit.github.io/sim-kennedy/visor_modelos_vensim.html](https://o62juantr-bit.github.io/sim-kennedy/visor_modelos_vensim.html)
-- 📁 **Modelos Vensim Originales (.mdl):** Ubicados en la carpeta [`modelos_vensim/`](./modelos_vensim/)
+- **Simulador Territorial en Línea:** [https://o62juantr-bit.github.io/sim-kennedy/](https://o62juantr-bit.github.io/sim-kennedy/)
+- **Visor Oficial de Modelos Vensim:** [https://o62juantr-bit.github.io/sim-kennedy/visor_modelos_vensim.html](https://o62juantr-bit.github.io/sim-kennedy/visor_modelos_vensim.html)
+- **Modelos Vensim (.mdl):** Ubicados en la carpeta [`modelos_vensim/`](./modelos_vensim/)
   - `S1Red de huertas abastecimiento decision.mdl`
   - `S2Organicos y compostaje.mdl`
   - `S3Habitat y fauna.mdl`
-  - `MODELO_BAVARIA_KENNEDY.mdl`
 
 ### 1.1 Objetivo General
 Diseñar y evaluar un modelo territorial de soberanía alimentaria y soporte socioecológico para el intercambio de alimentos, subproductos orgánicos y saberes agroecológicos en la localidad de Kennedy.

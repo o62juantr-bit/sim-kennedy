@@ -816,7 +816,7 @@ export class MapView {
 
       ctx.fillStyle = '#b91c1c';
       ctx.font = 'bold 10px monospace';
-      ctx.fillText('⚠ CONDICIÓN DE ESTRÉS EXÓGENO EN CURSO', this.width / 2 - 130, 33);
+      ctx.fillText('[ALERTA] CONDICIÓN DE ESTRÉS EXÓGENO EN CURSO', this.width / 2 - 145, 33);
     }
 
     ctx.restore();

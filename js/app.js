@@ -171,7 +171,7 @@ class AppController {
     }
     this.isPlaying = true;
     this.isMonteCarloMode = false;
-    document.getElementById('btn-play').textContent = '⏸ Pausar';
+    document.getElementById('btn-play').innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:-2px;margin-right:5px;"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>Pausar';
 
     this.playInterval = setInterval(() => {
       const snap = this.engine.step();
@@ -189,13 +189,14 @@ class AppController {
   pause() {
     this.isPlaying = false;
     clearInterval(this.playInterval);
-    document.getElementById('btn-play').textContent = '▶ Continuar';
+    document.getElementById('btn-play').innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:-2px;margin-right:5px;"><polygon points="5 3 19 12 5 21 5 3"/></svg>Continuar';
   }
 
   resetSimulation() {
     this.isMonteCarloMode = false;
     this.monteCarloData = null;
     this.engine.reset();
+    document.getElementById('btn-play').innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:-2px;margin-right:5px;"><polygon points="5 3 19 12 5 21 5 3"/></svg>Iniciar';
     const snap = this.engine.step(); // Avanzar 1 semana para poblar el estado
     this.updateHUD();
     this.updateKPIs(snap);
@@ -241,7 +242,7 @@ class AppController {
       this.isMonteCarloMode = true;
       this.monteCarloData = { series: results };
       btn.disabled = false;
-      btn.textContent = '⚄ Monte Carlo (30 Semillas)';
+      btn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:5px;"><rect x="2" y="2" width="20" height="20" rx="4"/><circle cx="7" cy="7" r="1.5" fill="currentColor"/><circle cx="17" cy="7" r="1.5" fill="currentColor"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/><circle cx="7" cy="17" r="1.5" fill="currentColor"/><circle cx="17" cy="17" r="1.5" fill="currentColor"/></svg>Monte Carlo (30 Semillas)';
 
       this.toast(`30 corridas finalizadas en ${elapsed}s con balance de masa verificado`);
       document.querySelector('[data-tab="tab-charts"]').click();
@@ -256,10 +257,10 @@ class AppController {
     const massState = this.engine.massTracker.getEstadoGeneral();
     const badge = document.getElementById('hud-balance-badge');
     if (massState.esValido) {
-      badge.textContent = '✓ BALANCE DE MASA OK';
+      badge.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:4px;"><polyline points="20 6 9 17 4 12"/></svg>BALANCE DE MASA OK';
       badge.className = 'badge-status';
     } else {
-      badge.textContent = `⚠ BALANCE ERROR (${massState.fallos})`;
+      badge.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:4px;"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>BALANCE ERROR (${massState.fallos})`;
       badge.className = 'badge-status error';
     }
   }
@@ -343,9 +344,9 @@ class AppController {
       }
 
       if (deterministic) {
-        out += '<span style="color:#34d399">✓ PASÓ: Las dos corridas de 104 semanas con semilla 9999 son idénticas bit a bit.</span>\n\n';
+        out += '<span style="color:#34d399">[PASS] Las dos corridas de 104 semanas con semilla 9999 son idénticas bit a bit.</span>\n\n';
       } else {
-        out += '<span style="color:#ef4444">✗ FALLÓ: Se detectó divergencia estocástica entre corridas con igual semilla.</span>\n\n';
+        out += '<span style="color:#ef4444">[FAIL] Se detectó divergencia estocástica entre corridas con igual semilla.</span>\n\n';
         allPassed = false;
       }
 
@@ -356,9 +357,9 @@ class AppController {
       out += `Discrepancia máxima detectada: ${massAudit.maxDiscrepancia.toFixed(6)} kg\n`;
 
       if (massAudit.esValido) {
-        out += '<span style="color:#34d399">✓ PASÓ: Balance de masa 100% conservativo. Ningún kg de alimento u orgánicos se creó ni destruyó sin regla explícita.</span>\n\n';
+        out += '<span style="color:#34d399">[PASS] Balance de masa 100% conservativo. Ningún kg de alimento u orgánicos se creó ni destruyó sin regla explícita.</span>\n\n';
       } else {
-        out += `<span style="color:#ef4444">✗ FALLÓ: ${massAudit.fallos} violaciones de balance de masa detectadas.</span>\n\n`;
+        out += `<span style="color:#ef4444">[FAIL] ${massAudit.fallos} violaciones de balance de masa detectadas.</span>\n\n`;
         allPassed = false;
       }
 
@@ -378,9 +379,9 @@ class AppController {
       out += `Propuesta Integral (+ Bavaria) Dependencia Corabastos: ${depPropFinal}%\n`;
 
       if (depPropFinal < depBaseFinal) {
-        out += `<span style="color:#34d399">✓ PASÓ: El modelo es sensible y evalúa la reducción de dependencia en ${(depBaseFinal - depPropFinal).toFixed(1)} puntos porcentuales.</span>\n`;
+        out += `<span style="color:#34d399">[PASS] El modelo es sensible y evalúa la reducción de dependencia en ${(depBaseFinal - depPropFinal).toFixed(1)} puntos porcentuales.</span>\n`;
       } else {
-        out += '<span style="color:#fbbf24">⚠ OBSERVACIÓN: La propuesta no redujo la dependencia. Resultado válido según premisa del grupo.</span>\n';
+        out += '<span style="color:#fbbf24">[OBSERVACIÓN] La propuesta no redujo la dependencia. Resultado válido según premisa del grupo.</span>\n';
       }
 
       out += '\n' + (allPassed ? '<span style="color:#34d399;font-weight:bold">TODAS LAS PRUEBAS COMPLETADAS CON ÉXITO.</span>' : '<span style="color:#ef4444;font-weight:bold">HAY PRUEBAS CON FALLO.</span>');

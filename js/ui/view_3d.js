@@ -99,7 +99,13 @@ export class View3D {
     // Si Three.js no está precargado, muestra aviso estético estilo HUD
     this.container.innerHTML = `
       <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:#7dd3fc;font-family:monospace;text-align:center;padding:20px">
-        <div style="font-size:32px;margin-bottom:10px">◈</div>
+        <div style="margin-bottom:12px">
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+            <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
+            <line x1="12" y1="22.08" x2="12" y2="12"/>
+          </svg>
+        </div>
         <div style="font-weight:bold;font-size:14px;letter-spacing:2px">VISTA 3D TERRITORIAL</div>
         <div style="color:#94a3b8;font-size:12px;margin-top:6px;max-width:380px">
           El simulador 2D nativo está activo. Para habilitar la maqueta 3D por GPU en alta fidelidad, la aplicación puede importar Three.js r160.

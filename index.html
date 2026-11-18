@@ -26,17 +26,17 @@
       <div class="hud-telemetry">
         <div class="telemetry-item">TIEMPO: <b id="hud-time">Semana 0 / 104</b></div>
         <div class="telemetry-item">SEMILLA: <b id="hud-seed">42</b></div>
-        <div class="badge-status" id="hud-balance-badge">✓ BALANCE DE MASA OK</div>
+        <div class="badge-status" id="hud-balance-badge"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:4px;"><polyline points="20 6 9 17 4 12"/></svg>BALANCE DE MASA OK</div>
       </div>
     </header>
 
     <!-- Toolbar de Controles y Escenarios -->
     <nav id="control-toolbar">
       <div class="control-group">
-        <button class="btn btn-primary" id="btn-play">▶ Iniciar</button>
-        <button class="btn" id="btn-step">Paso (+1 Sem)</button>
-        <button class="btn" id="btn-reset">↺ Reiniciar</button>
-        <button class="btn btn-montecarlo" id="btn-montecarlo">⚄ Monte Carlo (30 Semillas)</button>
+        <button class="btn btn-primary" id="btn-play"><svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:-2px;margin-right:5px;"><polygon points="5 3 19 12 5 21 5 3"/></svg>Iniciar</button>
+        <button class="btn" id="btn-step"><svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:-2px;margin-right:5px;"><polygon points="5 4 15 12 5 20 5 4"/><line x1="19" y1="5" x2="19" y2="19" stroke="currentColor" stroke-width="2"/></svg>Paso (+1 Sem)</button>
+        <button class="btn" id="btn-reset"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:5px;"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>Reiniciar</button>
+        <button class="btn btn-montecarlo" id="btn-montecarlo"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:5px;"><rect x="2" y="2" width="20" height="20" rx="4"/><circle cx="7" cy="7" r="1.5" fill="currentColor"/><circle cx="17" cy="7" r="1.5" fill="currentColor"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/><circle cx="7" cy="17" r="1.5" fill="currentColor"/><circle cx="17" cy="17" r="1.5" fill="currentColor"/></svg>Monte Carlo (30 Semillas)</button>
       </div>
 
       <div class="control-group">
@@ -58,8 +58,8 @@
       </div>
 
       <div class="control-group">
-        <button class="btn" id="btn-export-csv">📥 Exportar CSV</button>
-        <a href="visor_modelos_vensim.html" target="_blank" class="btn" style="text-decoration:none;display:inline-flex;align-items:center;gap:4px;background:#0369a1;color:#ffffff;font-weight:600;" title="Abrir Visor Oficial de Modelos Vensim">📊 Ver Modelos Vensim</a>
+        <button class="btn" id="btn-export-csv"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:5px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Exportar CSV</button>
+        <a href="visor_modelos_vensim.html" target="_blank" class="btn" style="text-decoration:none;display:inline-flex;align-items:center;gap:6px;background:#0369a1;color:#ffffff;font-weight:600;" title="Abrir Visor Oficial de Modelos Vensim"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Ver Modelos Vensim</a>
       </div>
     </nav>
 
@@ -73,15 +73,15 @@
 
           <!-- Barra flotante de navegación CAD (Pan & Zoom) -->
           <div id="map-controls-2d">
-            <button class="map-ctrl-btn" id="btn-zoom-in" title="Acercar (Zoom In)">＋</button>
-            <button class="map-ctrl-btn" id="btn-zoom-out" title="Alejar (Zoom Out)">－</button>
-            <button class="map-ctrl-btn" id="btn-zoom-reset" title="Centrar Kennedy">⛶</button>
+            <button class="map-ctrl-btn" id="btn-zoom-in" title="Acercar (Zoom In)"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
+            <button class="map-ctrl-btn" id="btn-zoom-out" title="Alejar (Zoom Out)"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
+            <button class="map-ctrl-btn" id="btn-zoom-reset" title="Centrar Kennedy"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg></button>
             <div id="zoom-level-badge">100%</div>
           </div>
 
           <!-- Indicador de navegación sutil -->
           <div id="map-hint-drag">
-            <span>🖱 Arrastra para moverte • Rueda del ratón para zoom</span>
+            <span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;margin-right:4px;"><rect x="5" y="2" width="14" height="20" rx="7"/><line x1="12" y1="6" x2="12" y2="10"/></svg>Arrastra para moverte • Rueda del ratón para zoom</span>
           </div>
         </div>
 
@@ -199,7 +199,7 @@
           </div>
 
           <button class="btn btn-primary" id="btn-run-tests" style="width:100%;justify-content:center;margin-bottom:12px">
-            ⚙ Ejecutar Suite de Pruebas
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:6px;"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>Ejecutar Suite de Pruebas
           </button>
 
           <div id="test-results-log" style="background:#04080e;border:1px solid var(--border-line);border-radius:6px;padding:10px;font-family:monospace;font-size:11px;min-height:160px;max-height:260px;overflow-y:auto;color:#cbd5e1">
