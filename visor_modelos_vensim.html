@@ -670,6 +670,23 @@
       stroke-width: 2.2;
     }
 
+    /* Polarities (+ / -) */
+    .v-polarity {
+      font-family: Arial, "Helvetica Neue", Helvetica, sans-serif;
+      font-size: 11px;
+      font-weight: bold;
+      fill: var(--vensim-blue);
+      pointer-events: none;
+      user-select: none;
+      transition: opacity 0.15s;
+    }
+    .v-loop-polarity {
+      fill: var(--vensim-loop-blue) !important;
+      font-size: 13px !important;
+      font-weight: 900 !important;
+      filter: drop-shadow(0 0 2px rgba(37, 99, 235, 0.7));
+    }
+
     /* Highlight States */
     .v-dimmed {
       opacity: 0.10 !important;
@@ -866,7 +883,11 @@
         </span>
         <span style="display:inline-flex;align-items:center;gap:4px;">
           <span style="font-weight:bold;color:#0000aa;">A→B</span>
-          <b>Causal:</b> Arco Azul Vensim
+          <b>Causal:</b> Arco Azul
+        </span>
+        <span style="display:inline-flex;align-items:center;gap:4px;">
+          <span style="font-weight:900;font-size:12px;color:#0000aa;">+ / −</span>
+          <b>Polaridad:</b> Causal
         </span>
       </div>
 
@@ -3397,7 +3418,12 @@ $192-192-192,0,Times New Roman|10||0-0-0|0-0-0|0-0-255|-1--1--1|-1--1--1|96,96,6
           const arrId = parseInt(p[1], 10);
           const fromId = parseInt(p[2], 10);
           const toId = parseInt(p[3], 10);
+          const polCode = parseInt(p[6], 10);
           const arrowType = parseInt(p[7], 10);
+
+          let polarity = '';
+          if (polCode === 43) polarity = '+';
+          else if (polCode === 45) polarity = '−';
 
           let cx = 0, cy = 0;
           const m = line.match(/\|\((-?\d+),(-?\d+)\)\|/);
@@ -3409,7 +3435,7 @@ $192-192-192,0,Times New Roman|10||0-0-0|0-0-0|0-0-255|-1--1--1|-1--1--1|96,96,6
           if (arrowType === 22) {
             flows.push({ arrId, fromId, toId, cx, cy });
           } else {
-            causals.push({ arrId, fromId, toId, cx, cy });
+            causals.push({ arrId, fromId, toId, cx, cy, polarity });
           }
         }
       }
@@ -3631,6 +3657,22 @@ $192-192-192,0,Times New Roman|10||0-0-0|0-0-0|0-0-255|-1--1--1|-1--1--1|96,96,6
         path.setAttribute('d', geom.d);
         path.setAttribute('marker-end', 'url(#arrow-causal)');
         gCausals.appendChild(path);
+
+        // Polarity text (+ / −)
+        if (arr.polarity) {
+          const polText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+          polText.setAttribute('class', 'v-polarity');
+          polText.id = `polarity-${arr.arrId}`;
+          polText.dataset.fromId = arr.fromId;
+          polText.dataset.toId = arr.toId;
+          polText.dataset.arrId = arr.arrId;
+          polText.setAttribute('x', geom.polX.toFixed(1));
+          polText.setAttribute('y', geom.polY.toFixed(1));
+          polText.setAttribute('text-anchor', 'middle');
+          polText.setAttribute('dominant-baseline', 'central');
+          polText.textContent = arr.polarity;
+          gCausals.appendChild(polText);
+        }
       }
 
       // 5. Nodes
@@ -3694,7 +3736,18 @@ $192-192-192,0,Times New Roman|10||0-0-0|0-0-0|0-0-255|-1--1--1|-1--1--1|96,96,6
         const nx = dx / len, ny = dy / len;
         const s1 = this.clipNodeRay(p1, srcBounds.w, srcBounds.h, nx, ny, srcBounds.kind);
         const s2 = this.clipNodeRay(p2, tgtBounds.w, tgtBounds.h, -nx, -ny, tgtBounds.kind);
-        return { d: `M ${s1.x.toFixed(1)} ${s1.y.toFixed(1)} L ${s2.x.toFixed(1)} ${s2.y.toFixed(1)}` };
+        
+        // Polarity near arrowhead, offset perpendicularly
+        const px = s2.x - nx * 18;
+        const py = s2.y - ny * 18;
+        const polX = px - ny * 10;
+        const polY = py + nx * 10;
+
+        return {
+          d: `M ${s1.x.toFixed(1)} ${s1.y.toFixed(1)} L ${s2.x.toFixed(1)} ${s2.y.toFixed(1)}`,
+          polX,
+          polY
+        };
       }
 
       // Circumcircle center and radius
@@ -3708,7 +3761,13 @@ $192-192-192,0,Times New Roman|10||0-0-0|0-0-0|0-0-255|-1--1--1|-1--1--1|96,96,6
         const nx = dx / len, ny = dy / len;
         const s1 = this.clipNodeRay(p1, srcBounds.w, srcBounds.h, nx, ny, srcBounds.kind);
         const s2 = this.clipNodeRay(p2, tgtBounds.w, tgtBounds.h, -nx, -ny, tgtBounds.kind);
-        return { d: `M ${s1.x.toFixed(1)} ${s1.y.toFixed(1)} L ${s2.x.toFixed(1)} ${s2.y.toFixed(1)}` };
+        const px = s2.x - nx * 18;
+        const py = s2.y - ny * 18;
+        return {
+          d: `M ${s1.x.toFixed(1)} ${s1.y.toFixed(1)} L ${s2.x.toFixed(1)} ${s2.y.toFixed(1)}`,
+          polX: px - ny * 10,
+          polY: py + nx * 10
+        };
       }
 
       const a1 = Math.atan2(y1 - uy, x1 - ux);
@@ -3741,8 +3800,19 @@ $192-192-192,0,Times New Roman|10||0-0-0|0-0-0|0-0-255|-1--1--1|-1--1--1|96,96,6
       const s1 = this.clipNodeRay(p1, srcBounds.w, srcBounds.h, t1x, t1y, srcBounds.kind);
       const s2 = this.clipNodeRay(p2, tgtBounds.w, tgtBounds.h, -t2x, -t2y, tgtBounds.kind);
 
+      // Polarity position: back 18px from s2, offset perpendicularly towards the outside of the curve
+      const px = s2.x - t2x * 18;
+      const py = s2.y - t2y * 18;
+      const distFromCenter = Math.hypot(px - ux, py - uy) || 1;
+      const radNormX = (px - ux) / distFromCenter;
+      const radNormY = (py - uy) / distFromCenter;
+      const polX = px + radNormX * 11;
+      const polY = py + radNormY * 11;
+
       return {
-        d: `M ${s1.x.toFixed(1)} ${s1.y.toFixed(1)} A ${r.toFixed(1)} ${r.toFixed(1)} 0 ${largeArc} ${sweep} ${s2.x.toFixed(1)} ${s2.y.toFixed(1)}`
+        d: `M ${s1.x.toFixed(1)} ${s1.y.toFixed(1)} A ${r.toFixed(1)} ${r.toFixed(1)} 0 ${largeArc} ${sweep} ${s2.x.toFixed(1)} ${s2.y.toFixed(1)}`,
+        polX,
+        polY
       };
     }
 
@@ -3806,6 +3876,16 @@ $192-192-192,0,Times New Roman|10||0-0-0|0-0-0|0-0-255|-1--1--1|-1--1--1|96,96,6
         } else if (fromId === node.id) {
           arrow.classList.add('v-highlight-out');
           arrow.setAttribute('marker-end', 'url(#arrow-causal-out)');
+        }
+      });
+
+      document.querySelectorAll('.v-polarity').forEach(pol => {
+        const fromId = parseInt(pol.dataset.fromId, 10);
+        const toId = parseInt(pol.dataset.toId, 10);
+        if (toId === node.id || fromId === node.id) {
+          pol.classList.add('v-loop-polarity');
+        } else {
+          pol.classList.remove('v-loop-polarity');
         }
       });
 
@@ -3961,7 +4041,7 @@ $192-192-192,0,Times New Roman|10||0-0-0|0-0-0|0-0-255|-1--1--1|-1--1--1|96,96,6
       }
 
       // 1. Dim everything first
-      document.querySelectorAll('.v-node, .v-causal-arrow, .v-flow-pipe, .v-valve, .v-cloud').forEach(el => el.classList.add('v-dimmed'));
+      document.querySelectorAll('.v-node, .v-causal-arrow, .v-flow-pipe, .v-valve, .v-cloud, .v-polarity').forEach(el => el.classList.add('v-dimmed'));
 
       // 2. Un-dim matched nodes & valves
       let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
@@ -3992,7 +4072,7 @@ $192-192-192,0,Times New Roman|10||0-0-0|0-0-0|0-0-255|-1--1--1|-1--1--1|96,96,6
         }
       });
 
-      // 3. Highlight causal arrows connecting matched elements
+      // 3. Highlight causal arrows and polarities connecting matched elements
       document.querySelectorAll('.v-causal-arrow').forEach(arr => {
         const fId = parseInt(arr.dataset.fromId, 10);
         const tId = parseInt(arr.dataset.toId, 10);
@@ -4000,6 +4080,15 @@ $192-192-192,0,Times New Roman|10||0-0-0|0-0-0|0-0-255|-1--1--1|-1--1--1|96,96,6
           arr.classList.remove('v-dimmed');
           arr.classList.add('v-loop-arrow');
           arr.setAttribute('marker-end', 'url(#arrow-causal-loop)');
+        }
+      });
+
+      document.querySelectorAll('.v-polarity').forEach(pol => {
+        const fId = parseInt(pol.dataset.fromId, 10);
+        const tId = parseInt(pol.dataset.toId, 10);
+        if (matchedNodeIds.has(fId) && matchedNodeIds.has(tId)) {
+          pol.classList.remove('v-dimmed');
+          pol.classList.add('v-loop-polarity');
         }
       });
 
@@ -4033,6 +4122,9 @@ $192-192-192,0,Times New Roman|10||0-0-0|0-0-0|0-0-255|-1--1--1|-1--1--1|96,96,6
       document.querySelectorAll('.v-loop-arrow').forEach(el => {
         el.classList.remove('v-loop-arrow');
         el.setAttribute('marker-end', 'url(#arrow-causal)');
+      });
+      document.querySelectorAll('.v-polarity').forEach(pol => {
+        pol.classList.remove('v-loop-polarity');
       });
       const banner = document.getElementById('hud-loop-banner');
       if (banner) banner.style.display = 'none';
