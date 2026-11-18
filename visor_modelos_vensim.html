@@ -602,8 +602,20 @@
       padding: 14px;
       box-shadow: 0 1px 3px rgba(0,0,0,0.04);
       height: 380px;
+      min-height: 380px;
+      max-height: 380px;
       display: flex;
       flex-direction: column;
+      overflow: hidden;
+    }
+    #sim-chart-canvas {
+      display: block;
+      width: 100% !important;
+      height: 100% !important;
+      max-width: 100%;
+      max-height: 100%;
+      flex: 1 1 0;
+      min-height: 0;
     }
 
     /* AUTHENTIC VENSIM SVG STYLING */
@@ -980,8 +992,8 @@
             <span style="font-size:13px;font-weight:bold;color:var(--text-main);" id="sim-chart-title">Trayectorias de Estados y Niveles</span>
             <span style="font-size:11px;color:var(--text-muted);" id="sim-horizon-label">Horizonte: 104 Semanas (dt = 0.5)</span>
           </div>
-          <div style="flex:1;position:relative;">
-            <canvas id="sim-chart-canvas" style="width:100%;height:100%;"></canvas>
+          <div style="flex:1;min-height:0;position:relative;overflow:hidden;">
+            <canvas id="sim-chart-canvas" style="position:absolute;top:0;left:0;width:100%;height:100%;"></canvas>
           </div>
         </div>
       </div>
@@ -4367,10 +4379,13 @@ $192-192-192,0,Times New Roman|10||0-0-0|0-0-0|0-0-255|-1--1--1|-1--1--1|96,96,6
       const canvas = document.getElementById('sim-chart-canvas');
       if (!canvas) return;
       const ctx = canvas.getContext('2d');
-      const w = canvas.parentElement.clientWidth || 600;
-      const h = canvas.parentElement.clientHeight || 340;
-      canvas.width = w;
-      canvas.height = h;
+      // Read CSS-rendered size BEFORE touching canvas.width/height to avoid reflow cascade
+      const rect = canvas.getBoundingClientRect();
+      const w = Math.round(rect.width) || 600;
+      const h = Math.round(rect.height) || 340;
+      // Only reassign if truly different (prevents parent container growth feedback loop)
+      if (canvas.width !== w) canvas.width = w;
+      if (canvas.height !== h) canvas.height = h;
 
       ctx.clearRect(0, 0, w, h);
 
