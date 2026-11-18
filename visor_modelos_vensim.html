@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Vensim® Model Viewer • Dinámica de Sistemas Kennedy</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%230000aa' stroke-width='2'><rect x='2' y='4' width='20' height='16' rx='2'/><path d='M6 12h12M12 6v12'/></svg>">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%230000aa'><rect x='2' y='4' width='20' height='16' rx='2' fill='none' stroke='%230000aa' stroke-width='2'/><path d='M6 12h12M12 6v12' stroke='%230000aa' stroke-width='2'/></svg>">
   <style>
     :root {
       --bg-app: #f1f3f5;
@@ -58,15 +58,21 @@
       user-select: none;
     }
 
-    .svg-ico {
+    /* SVG ICONS HELPER */
+    .v-ico {
+      width: 14px;
+      height: 14px;
       display: inline-block;
       vertical-align: middle;
+      stroke: currentColor;
+      stroke-width: 2;
       stroke-linecap: round;
       stroke-linejoin: round;
+      fill: none;
       flex-shrink: 0;
     }
 
-    /* VENSIM APPLICATION TOOLBAR */
+    /* VENSIM WORKSPACE TOOLBAR */
     #vensim-toolbar {
       background: var(--bg-header);
       border-bottom: 1px solid var(--border-color);
@@ -89,9 +95,6 @@
       font-weight: bold;
       color: var(--vensim-blue);
       letter-spacing: 0.3px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
     }
     .brand-subtitle {
       font-size: 11px;
@@ -191,10 +194,13 @@
       left: 7px;
       top: 50%;
       transform: translateY(-50%);
+      width: 13px;
+      height: 13px;
       color: var(--text-dim);
       pointer-events: none;
-      display: flex;
-      align-items: center;
+      stroke: currentColor;
+      stroke-width: 2;
+      fill: none;
     }
     .search-results {
       position: absolute;
@@ -237,7 +243,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 6px;
+      gap: 5px;
       cursor: pointer;
       transition: all 0.15s;
     }
@@ -328,13 +334,7 @@
       gap: 16px;
       font-size: 11px;
       color: var(--text-muted);
-      display: flex;
       align-items: center;
-    }
-    .legend-entry {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
     }
 
     /* RIGHT INSPECTOR DOCK */
@@ -616,6 +616,7 @@
       font-weight: normal;
     }
 
+    /* Flow Pipes */
     .v-flow-pipe {
       stroke: var(--vensim-black);
       stroke-width: 2.0;
@@ -632,6 +633,7 @@
       stroke-width: 1.2;
     }
 
+    /* Causal Arrows: Authentic Vensim Blue */
     .v-causal-arrow {
       stroke: var(--vensim-blue);
       stroke-width: 1.2;
@@ -643,6 +645,7 @@
       stroke-width: 2.2;
     }
 
+    /* Highlight States */
     .v-dimmed {
       opacity: 0.12 !important;
     }
@@ -667,30 +670,27 @@
   <!-- VENSIM WORKSPACE TOOLBAR -->
   <header id="vensim-toolbar">
     <div class="brand-section">
-      <span class="brand-title">
-        <svg class="svg-ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M6 12h12M12 6v12"/></svg>
-        Vensim® PLE / DSS Viewer
-      </span>
+      <span class="brand-title">Vensim® PLE / DSS Viewer</span>
       <span style="color:var(--border-dark)">|</span>
       <span class="brand-subtitle" id="model-subtitle">Kennedy Dinámica de Sistemas</span>
     </div>
 
-    <!-- MODEL TABS (ONLY S1, S2, S3) -->
+    <!-- MODEL TABS -->
     <div class="model-pills" id="model-tabs">
       <button class="model-pill-btn active" data-model="s1">
-        <svg class="svg-ico" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 20h10"/><path d="M10 20c5.5-2.5.8-6.4 3-10"/><path d="M9.5 9.4c1.1.8 1.8 2.2 2.3 3.7-2 .4-3.5.4-4.8-.3-1.2-.6-2.3-1.9-3-4.2 2.8-.5 4.4 0 5.5.8z"/><path d="M14.1 6a7 7 0 0 0-1.1 4c1.9-.1 3.3-.6 4.3-1.4 1-1 1.6-2.3 1.7-4.6-2.7.1-4 1-4.9 2z"/></svg>
+        <svg class="v-ico" viewBox="0 0 24 24"><path d="M7 20h10M12 20v-8M12 12c0-5 4-8 8-8 0 4-3 8-8 8zM12 12c0-3-2.5-5-5-5 0 2.5 2 5 5 5z"/></svg>
         S1: Huertas & Abastecimiento
       </button>
       <button class="model-pill-btn" data-model="s2">
-        <svg class="svg-ico" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 19H4.815a1.83 1.83 0 0 1-1.57-.881 1.785 1.785 0 0 1-.004-1.784L7.196 9.5"/><path d="M11 19h8.2a1.8 1.8 0 0 0 1.565-.9 1.78 1.78 0 0 0 .005-1.77L17.5 11"/><path d="m14 16 3 3 3-3"/><path d="m8.5 7 1.5-3h5.4a1.8 1.8 0 0 1 1.565.9 1.78 1.78 0 0 1 .005 1.77L15 10"/><path d="m14 4-3-3-3 3"/><path d="m5 16 2-3.5"/></svg>
+        <svg class="v-ico" viewBox="0 0 24 24"><path d="M7 19H4.8a2 2 0 0 1-1.6-.9 2 2 0 0 1 0-1.8L7.2 9.5M11 19h8.2a2 2 0 0 0 1.6-.9 2 2 0 0 0 0-1.8L16.8 9.5M12 5l4 7H8z"/></svg>
         S2: Orgánicos & Compostaje
       </button>
       <button class="model-pill-btn" data-model="s3">
-        <svg class="svg-ico" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 7h.01"/><path d="M3.4 18H12a8 8 0 0 0 8-8V7a4 4 0 0 0-7.28-2.3L2 18z"/><path d="m20 7 2 .5-2 .5"/><path d="M10 18v3"/><path d="M14 17.75V21"/><path d="M7 18a6 6 0 0 0 3.84-10.61"/></svg>
+        <svg class="v-ico" viewBox="0 0 24 24"><path d="M20.2 12.2a6 6 0 0 0-8.5-8.5L5 10.5V19h8.5zM16 8L2 22M17.5 15H9"/></svg>
         S3: Hábitat & Fauna
       </button>
       <button class="model-pill-btn" id="btn-upload-mdl" title="Cargar otro archivo Vensim (.mdl)">
-        <svg class="svg-ico" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><path d="M12 12v6"/><path d="m9 15 3-3 3 3"/></svg>
+        <svg class="v-ico" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
         Cargar .mdl
       </button>
       <input type="file" id="file-input-mdl" accept=".mdl" style="display:none;">
@@ -699,19 +699,19 @@
     <!-- VIEW MODE TABS -->
     <div class="view-pills" id="view-mode-tabs">
       <button class="view-pill-btn active" data-view="diagram">
-        <svg class="svg-ico" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+        <svg class="v-ico" viewBox="0 0 24 24"><rect x="3" y="3" width="6" height="6" rx="1"/><rect x="15" y="15" width="6" height="6" rx="1"/><rect x="15" y="3" width="6" height="6" rx="1"/><path d="M6 9v3a3 3 0 0 0 3 3h6M18 9v6"/></svg>
         Diagrama Vensim
       </button>
       <button class="view-pill-btn" data-view="equations">
-        <svg class="svg-ico" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M3 15h18"/><path d="M9 3v18"/><path d="M15 3v18"/></svg>
+        <svg class="v-ico" viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><circle cx="4" cy="6" r="1.5" fill="currentColor"/><circle cx="4" cy="12" r="1.5" fill="currentColor"/><circle cx="4" cy="18" r="1.5" fill="currentColor"/></svg>
         Ecuaciones (<span id="count-vars">0</span>)
       </button>
       <button class="view-pill-btn" data-view="loops">
-        <svg class="svg-ico" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.5 2v6h-6"/><path d="M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-1.19"/></svg>
+        <svg class="v-ico" viewBox="0 0 24 24"><path d="M21.5 2v6h-6M21.3 15.6A10 10 0 1 1 20.8 7.2l5.7-1.2"/></svg>
         Bucles CLD
       </button>
       <button class="view-pill-btn" data-view="simulator">
-        <svg class="svg-ico" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
+        <svg class="v-ico" viewBox="0 0 24 24"><path d="M3 3v18h18M7 16l4-4 4 4 6-6"/></svg>
         Simulador
       </button>
     </div>
@@ -719,17 +719,15 @@
     <!-- SEARCH & CONTROLS -->
     <div class="tools-right">
       <div class="search-wrap">
-        <span class="search-ico">
-          <svg class="svg-ico" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-        </span>
+        <svg class="search-ico" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
         <input type="text" id="quick-search" class="search-box" placeholder="Buscar variable..." autocomplete="off">
         <div id="search-dropdown" class="search-results"></div>
       </div>
       <button id="btn-theme" class="btn-tool" title="Alternar tema claro/oscuro">
-        <svg class="svg-ico" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a10 10 0 0 1 0 20Z" fill="currentColor"/></svg>
+        <svg class="v-ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
       </button>
       <button id="btn-export-svg" class="btn-tool" title="Exportar SVG">
-        <svg class="svg-ico" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        <svg class="v-ico" viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
       </button>
     </div>
   </header>
@@ -741,6 +739,7 @@
     <div id="pane-diagram" class="stage-pane active">
       <svg id="svg-diagram">
         <defs>
+          <!-- Classic Vensim Blue Causal Arrowhead -->
           <marker id="arrow-causal" viewBox="0 0 10 10" refX="7.5" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
             <path d="M 0 2 L 7.5 5 L 0 8 z" fill="var(--vensim-blue)"/>
           </marker>
@@ -750,6 +749,7 @@
           <marker id="arrow-causal-out" viewBox="0 0 10 10" refX="7.5" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
             <path d="M 0 2 L 7.5 5 L 0 8 z" fill="var(--highlight-out)"/>
           </marker>
+          <!-- Flow Arrowhead (Black) -->
           <marker id="arrow-flow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
             <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="var(--vensim-black)"/>
           </marker>
@@ -767,14 +767,14 @@
       <!-- ZOOM & FIT HUD -->
       <div class="canvas-hud" id="hud-zoom">
         <button id="btn-zoom-in" class="btn-tool" style="width:28px;padding:0;" title="Acercar">
-          <svg class="svg-ico" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          <svg class="v-ico" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         </button>
         <button id="btn-zoom-out" class="btn-tool" style="width:28px;padding:0;" title="Alejar">
-          <svg class="svg-ico" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          <svg class="v-ico" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/></svg>
         </button>
-        <button id="btn-zoom-reset" class="btn-tool" style="width:28px;padding:0;font-size:10px;font-weight:bold;" title="1:1">1:1</button>
+        <button id="btn-zoom-reset" class="btn-tool" style="width:28px;padding:0;" title="1:1">1:1</button>
         <button id="btn-zoom-fit" class="btn-tool" style="width:28px;padding:0;" title="Ajustar todo a la pantalla">
-          <svg class="svg-ico" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
+          <svg class="v-ico" viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v3M21 8V5a2 2 0 0 0-2-2h-3M3 16v3a2 2 0 0 0 2 2h3M16 21h3a2 2 0 0 0 2-2v-3"/></svg>
         </button>
       </div>
 
@@ -786,27 +786,27 @@
         <label class="hud-toggle-label"><input type="checkbox" id="chk-causals" checked> Flechas Causales</label>
       </div>
 
-      <!-- VENSIM LEGEND HUD (PURE SVG) -->
+      <!-- VENSIM LEGEND HUD -->
       <div class="canvas-hud" id="hud-legend">
-        <span class="legend-entry">
-          <svg width="14" height="10" viewBox="0 0 14 10"><rect x="1" y="1" width="12" height="8" fill="#fff" stroke="#000" stroke-width="1.3"/></svg>
+        <span style="display:inline-flex;align-items:center;gap:4px;">
+          <svg class="v-ico" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="1"/></svg>
           <b>Nivel:</b> Rectángulo
         </span>
-        <span class="legend-entry">
-          <svg width="12" height="12" viewBox="0 0 14 14"><polygon points="1,2 11,12 11,2 1,12" fill="#fff" stroke="#000" stroke-width="1.2"/></svg>
+        <span style="display:inline-flex;align-items:center;gap:4px;">
+          <svg class="v-ico" viewBox="0 0 24 24"><polygon points="4 6 20 18 20 6 4 18"/></svg>
           <b>Flujo:</b> Válvula
         </span>
-        <span class="legend-entry">
-          <svg width="14" height="10" viewBox="0 0 24 16"><path d="M 4 12 a 4 4 0 0 1 2 -7 a 6 6 0 0 1 11 0 a 4 4 0 0 1 3 4 a 3 3 0 0 1 -3 3 L 4 12 z" fill="#fff" stroke="#000" stroke-width="1.5"/></svg>
+        <span style="display:inline-flex;align-items:center;gap:4px;">
+          <svg class="v-ico" viewBox="0 0 24 24"><path d="M18 10h-1.3A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/></svg>
           <b>Nube:</b> Fuente / Sumidero
         </span>
-        <span class="legend-entry">
-          <span style="font-weight:bold;font-size:11px;font-family:Arial;">T</span>
-          <b>Auxiliar:</b> Texto
+        <span style="display:inline-flex;align-items:center;gap:4px;">
+          <svg class="v-ico" viewBox="0 0 24 24"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>
+          <b>Auxiliar:</b> Texto plano
         </span>
-        <span class="legend-entry">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#0000aa" stroke-width="2.5"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg>
-          <b style="color:var(--vensim-blue);">Influencia:</b> Flecha azul
+        <span style="display:inline-flex;align-items:center;gap:4px;">
+          <svg class="v-ico" viewBox="0 0 24 24" style="stroke:var(--vensim-blue);"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg>
+          <b>Influencia:</b> Flecha curva azul
         </span>
       </div>
 
@@ -818,7 +818,7 @@
             <div class="dock-name" id="insp-title">Selecciona una variable</div>
           </div>
           <button id="btn-close-dock" class="btn-tool" style="width:24px;padding:0;" title="Cerrar">
-            <svg class="svg-ico" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            <svg class="v-ico" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
           </button>
         </div>
 
@@ -827,7 +827,7 @@
             <div class="dock-card-title">
               <span>Ecuación Vensim</span>
               <button id="btn-copy-eq" class="btn-tool" style="height:20px;font-size:10px;padding:0 6px;">
-                <svg class="svg-ico" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                <svg class="v-ico" style="width:11px;height:11px;" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
                 Copiar
               </button>
             </div>
@@ -866,11 +866,11 @@
 
         <div class="dock-actions">
           <button id="btn-isolate" class="btn-tool" style="flex:1;">
-            <svg class="svg-ico" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+            <svg class="v-ico" viewBox="0 0 24 24"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
             Aislar Subred
           </button>
           <button id="btn-center" class="btn-tool" style="flex:1;background:var(--vensim-blue);color:#fff;">
-            <svg class="svg-ico" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="22" y1="12" x2="18" y2="12"/><line x1="6" y1="12" x2="2" y2="12"/><line x1="12" y1="6" x2="12" y2="2"/><line x1="12" y1="22" x2="12" y2="18"/></svg>
+            <svg class="v-ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/></svg>
             Centrar
           </button>
         </div>
@@ -883,26 +883,26 @@
         <div class="filter-btn-group">
           <button class="filter-btn active" data-filter="all">Todas (<span id="pill-count-all">0</span>)</button>
           <button class="filter-btn" data-filter="stock">
-            <svg class="svg-ico" width="11" height="9" viewBox="0 0 14 10"><rect x="1" y="1" width="12" height="8" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>
+            <svg class="v-ico" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="1"/></svg>
             Niveles (<span id="pill-count-stock">0</span>)
           </button>
           <button class="filter-btn" data-filter="flow">
-            <svg class="svg-ico" width="11" height="11" viewBox="0 0 14 14"><polygon points="2,2 12,12 12,2 2,12" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>
+            <svg class="v-ico" viewBox="0 0 24 24"><polygon points="4 6 20 18 20 6 4 18"/></svg>
             Flujos (<span id="pill-count-flow">0</span>)
           </button>
           <button class="filter-btn" data-filter="aux">
-            <span style="font-weight:bold;font-size:10px;">A</span>
+            <svg class="v-ico" viewBox="0 0 24 24"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>
             Auxiliares (<span id="pill-count-aux">0</span>)
           </button>
           <button class="filter-btn" data-filter="constant">
-            <span style="font-weight:bold;font-size:10px;">#</span>
+            <svg class="v-ico" viewBox="0 0 24 24"><line x1="4" y1="9" x2="20" y2="9"/><line x1="4" y1="15" x2="20" y2="15"/><line x1="10" y1="3" x2="8" y2="21"/><line x1="16" y1="3" x2="14" y2="21"/></svg>
             Constantes (<span id="pill-count-const">0</span>)
           </button>
         </div>
         <div style="display:flex;gap:8px;">
           <input type="text" id="table-search" class="search-box" placeholder="Filtrar por nombre o unidades..." style="width:240px;">
           <button id="btn-export-csv" class="btn-tool">
-            <svg class="svg-ico" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            <svg class="v-ico" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
             Exportar CSV
           </button>
         </div>
@@ -943,11 +943,11 @@
           <div id="sim-sliders-container" style="display:flex;flex-direction:column;gap:12px;margin-top:6px;"></div>
           <div style="margin-top:auto;display:flex;flex-direction:column;gap:6px;">
             <button id="btn-run-sim" class="btn-tool" style="background:var(--vensim-blue);color:#fff;padding:8px;">
-              <svg class="svg-ico" width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+              <svg class="v-ico" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21"/></svg>
               Ejecutar Simulación
             </button>
             <button id="btn-reset-sim" class="btn-tool">
-              <svg class="svg-ico" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+              <svg class="v-ico" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><polyline points="3 3 3 8 8 8"/></svg>
               Restaurar Valores
             </button>
           </div>
@@ -968,7 +968,7 @@
 
   </main>
 
-  <!-- EMBEDDED RAW MDL MODELS (S1, S2, S3) -->
+  <!-- EMBEDDED RAW MDL MODELS -->
   <script type="text/plain" id="mdl-data-s1">
 {UTF-8}
 STK01 Huertas activas  = A FUNCTION OF( -Area meta,FLI01 Apertura de huertas) ~~|
@@ -3466,7 +3466,7 @@ $192-192-192,0,Times New Roman|10||0-0-0|0-0-0|0-0-255|-1--1--1|-1--1--1|96,96,6
         return null;
       };
 
-      // 1. Vensim Clouds (Sources & Sinks)
+      // 1. Clouds
       for (const cId in sketch.clouds) {
         const c = sketch.clouds[cId];
         const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
@@ -3484,7 +3484,7 @@ $192-192-192,0,Times New Roman|10||0-0-0|0-0-0|0-0-255|-1--1--1|-1--1--1|96,96,6
         gClouds.appendChild(g);
       }
 
-      // 2. Vensim Flow Pipes
+      // 2. Flow Pipes
       for (const f of sketch.flows) {
         const p1 = getPos(f.fromId);
         const p2 = getPos(f.toId);
@@ -3509,7 +3509,7 @@ $192-192-192,0,Times New Roman|10||0-0-0|0-0-0|0-0-255|-1--1--1|-1--1--1|96,96,6
         gFlows.appendChild(path);
       }
 
-      // 3. Vensim Valves (Hourglass with tap handle)
+      // 3. Valves
       for (const vId in sketch.valves) {
         const v = sketch.valves[vId];
         const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
@@ -3523,7 +3523,7 @@ $192-192-192,0,Times New Roman|10||0-0-0|0-0-0|0-0-255|-1--1--1|-1--1--1|96,96,6
         gValves.appendChild(g);
       }
 
-      // 4. Vensim Causal Arrows
+      // 4. Causal Arrows
       for (const arr of sketch.causals) {
         const p1 = getPos(arr.fromId);
         const p2 = getPos(arr.toId);
@@ -3549,7 +3549,7 @@ $192-192-192,0,Times New Roman|10||0-0-0|0-0-0|0-0-255|-1--1--1|-1--1--1|96,96,6
         gCausals.appendChild(path);
       }
 
-      // 5. Vensim Nodes
+      // 5. Nodes
       for (const nId in sketch.nodes) {
         const n = sketch.nodes[nId];
         const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
@@ -3716,7 +3716,7 @@ $192-192-192,0,Times New Roman|10||0-0-0|0-0-0|0-0-255|-1--1--1|-1--1--1|96,96,6
           outBox.appendChild(pill);
         }
       } else {
-        inBox.innerHTML = '<span style="font-size:10px;color:var(--text-dim);">(Sumidero / Sin dependientes)</span>';
+        outBox.innerHTML = '<span style="font-size:10px;color:var(--text-dim);">(Sumidero / Sin dependientes)</span>';
       }
     }
 
@@ -3831,7 +3831,7 @@ $192-192-192,0,Times New Roman|10||0-0-0|0-0-0|0-0-255|-1--1--1|-1--1--1|96,96,6
           <td style="color:var(--text-muted);">${this.escapeXml(v.doc || '-')}</td>
           <td style="text-align:center;">
             <button class="btn-tool" style="padding:2px 8px;height:22px;" title="Ver en Diagrama">
-              <svg class="svg-ico" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="3"/><path d="M12 2a8 8 0 0 0-8 8c0 5.25 8 12 8 12s8-6.75 8-12a8 8 0 0 0-8-8z"/></svg>
+              <svg class="v-ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>
               Ver
             </button>
           </td>
@@ -3878,7 +3878,7 @@ $192-192-192,0,Times New Roman|10||0-0-0|0-0-0|0-0-255|-1--1--1|-1--1--1|96,96,6
             ${loop.vars.map(v => `<span class="conn-tag">${this.escapeXml(v)}</span>`).join('')}
           </div>
           <button class="btn-tool" style="margin-top:6px;width:100%;">
-            <svg class="svg-ico" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.5 2v6h-6"/><path d="M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-1.19"/></svg>
+            <svg class="v-ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>
             Resaltar en Diagrama
           </button>
         `;
@@ -4291,7 +4291,7 @@ $192-192-192,0,Times New Roman|10||0-0-0|0-0-0|0-0-255|-1--1--1|-1--1--1|96,96,6
           btn.className = 'model-pill-btn active';
           btn.dataset.model = customKey;
           btn.innerHTML = `
-            <svg class="svg-ico" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            <svg class="v-ico" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
             ${file.name.slice(0, 16)}...
           `;
           btn.onclick = () => this.switchModel(customKey);
@@ -4374,6 +4374,7 @@ $192-192-192,0,Times New Roman|10||0-0-0|0-0-0|0-0-255|-1--1--1|-1--1--1|96,96,6
     }
   }
 
+  // Self start immediately
   window.app = new AppController();
   </script>
 </body>

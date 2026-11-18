@@ -11,7 +11,7 @@ Desarrollado para el curso de **Modelamiento Dinámico y Simulación** (Pontific
 ### 1.0 Acceso Rápido y Modelos Vensim
 - **Simulador Territorial en Línea:** [https://o62juantr-bit.github.io/sim-kennedy/](https://o62juantr-bit.github.io/sim-kennedy/)
 - **Visor Oficial de Modelos Vensim:** [https://o62juantr-bit.github.io/sim-kennedy/visor_modelos_vensim.html](https://o62juantr-bit.github.io/sim-kennedy/visor_modelos_vensim.html)
-- **Modelos Vensim (.mdl):** Ubicados en la carpeta [`modelos_vensim/`](./modelos_vensim/)
+- **Modelos Vensim Originales (.mdl):** Ubicados en la carpeta [`modelos_vensim/`](./modelos_vensim/)
   - `S1Red de huertas abastecimiento decision.mdl`
   - `S2Organicos y compostaje.mdl`
   - `S3Habitat y fauna.mdl`
